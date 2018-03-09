@@ -94,7 +94,7 @@ public final class GaussianFilter implements LowPassFilter {
             }
         }
 
-        Image result = new Image(image.getHeight(), image.getWidth());
+        Image result = new Image(image.getHeight(), image.getWidth(), scale);
 
         // vertical pass (in-place)
         double[][] vertical = new double[image.getHeight()][image.getWidth()];

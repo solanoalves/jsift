@@ -107,7 +107,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
         startImage = filter.filter(startImage, initialSigma);
 
         List<Octave> octaves = new ArrayList<Octave>();
-        while (startImage.getWidth() > 0 && startImage.getHeight() > 0) {
+        while (startImage.getWidth() > 0 && startImage.getHeight() > 0 && startImage.getScale() > Math.pow(2.0, -3.0)) {
             Octave octave = octaveFactory.create(startImage, scalesPerOctave,
                     filter);
             octaves.add(octave);
@@ -117,7 +117,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
             Image twiceBlurred = octave.getScaleImages().get(scalesPerOctave);
             startImage = downScaler.downScale(twiceBlurred);
         }
-
+        
         return new ScaleSpace(octaves);
     }
 }

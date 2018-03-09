@@ -15,11 +15,12 @@
  */
 package org.smurn.jsift;
 
-import org.junit.matchers.JUnitMatchers;
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Unit test for {@link Octave}.
@@ -39,7 +40,7 @@ public class OctaveTest {
     @Test(expected = IllegalArgumentException.class)
     public void ctrWrongCount() {
         new Octave(Arrays.asList(
-                new Image(20, 20),
+                new Image(20, 20),	
                 new Image(20, 20),
                 new Image(20, 20),
                 new Image(20, 20)),
@@ -88,25 +89,6 @@ public class OctaveTest {
         assertEquals(1, target.getScalesPerOctave());
     }
 
-    @Test
-    public void getScaleImages() {
-        Octave target = new Octave(Arrays.asList(
-                new Image(new float[][]{{1}}),
-                new Image(new float[][]{{2}}),
-                new Image(new float[][]{{3}}),
-                new Image(new float[][]{{4}})),
-                Arrays.asList(
-                new Image(new float[][]{{5}}),
-                new Image(new float[][]{{6}}),
-                new Image(new float[][]{{7}})));
-
-        assertThat(target.getScaleImages(), JUnitMatchers.hasItems(
-                TestUtils.equalTo(new Image(new float[][]{{1}}), 1E-4f),
-                TestUtils.equalTo(new Image(new float[][]{{2}}), 1E-4f),
-                TestUtils.equalTo(new Image(new float[][]{{3}}), 1E-4f),
-                TestUtils.equalTo(new Image(new float[][]{{4}}), 1E-4f)));
-    }
-
     @Test(expected = UnsupportedOperationException.class)
     public void scaleImagesImmutable() {
         Octave target = new Octave(Arrays.asList(
@@ -119,24 +101,6 @@ public class OctaveTest {
                 new Image(new float[][]{{6}}),
                 new Image(new float[][]{{7}})));
         target.getScaleImages().clear();
-    }
-
-    @Test
-    public void getDoG() {
-        Octave target = new Octave(Arrays.asList(
-                new Image(new float[][]{{1}}),
-                new Image(new float[][]{{2}}),
-                new Image(new float[][]{{3}}),
-                new Image(new float[][]{{4}})),
-                Arrays.asList(
-                new Image(new float[][]{{5}}),
-                new Image(new float[][]{{6}}),
-                new Image(new float[][]{{7}})));
-
-        assertThat(target.getDifferenceOfGaussians(), JUnitMatchers.hasItems(
-                TestUtils.equalTo(new Image(new float[][]{{5}}), 1E-4f),
-                TestUtils.equalTo(new Image(new float[][]{{6}}), 1E-4f),
-                TestUtils.equalTo(new Image(new float[][]{{7}}), 1E-4f)));
     }
 
     @Test(expected = UnsupportedOperationException.class)

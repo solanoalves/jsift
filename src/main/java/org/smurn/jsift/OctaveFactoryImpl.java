@@ -58,7 +58,6 @@ public class OctaveFactoryImpl implements OctaveFactory {
         for (int i = 1; i < scalesPerOctave + ADDITIONAL_SCALES + 1; i++) {
             double nextSigma = image.getSigma()
                     * Math.pow(2.0, (double) i / scalesPerOctave);
-
             Image scaleImage = filter.filter(scaleImages.get(i - 1), nextSigma);
             scaleImages.add(scaleImage);
         }

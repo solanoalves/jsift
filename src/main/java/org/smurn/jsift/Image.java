@@ -112,6 +112,10 @@ public class Image {
     public Image(final int height, final int width) {
         this(height, width, DEFAULT_SIGMA, 1.0, 0.0, 0.0);
     }
+    
+    public Image(final int height, final int width, double scale) {
+        this(height, width, DEFAULT_SIGMA, scale, 0.0, 0.0);
+    }
 
     /**
      * Creates an image from the given pixel values.
