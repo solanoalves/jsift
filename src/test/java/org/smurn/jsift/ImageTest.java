@@ -15,6 +15,8 @@
  */
 package org.smurn.jsift;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -32,13 +34,13 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-			BufferedImage base = ImageIO.read(new File("lena.bmp"));
+			BufferedImage base = ImageIO.read(new File("lena90.jpg"));
 //			BufferedImage target = ImageIO.read(new File("olho.bmp"));
 
 			Image imgBase = new Image(base);
 //			Image imgTarget = new Image(target);
 
-			// Cria o scalespace com as octaves (5 octaves com 5 imgs cada)
+			// Cria o scalespace com as octaves (4 octaves com 5 imgs cada)
 			ScaleSpaceFactoryImpl spaceFac = new ScaleSpaceFactoryImpl();
 			ScaleSpace ssBase = spaceFac.create(imgBase);
 //			ScaleSpace ssTarget = spaceFac.create(imgTarget);
@@ -51,17 +53,14 @@ public class ImageTest {
 			System.out.println("total "+pointsBase.size());
 //			Collection<ScaleSpacePoint> pointsTarget = extremaDetector.detectKeypoints(ssTarget);
 //
-//			Color myWhite = new Color(255, 255, 0); // Color white
-//			for (ScaleSpacePoint pointBase : pointsBase) {
-//				for (ScaleSpacePoint pointTarget : pointsTarget) {
-//					if (pointBase.equals(pointTarget)) {
-//						base.setRGB((int) pointBase.getX(), (int) pointBase.getY(), myWhite.getRGB());
-//					}
-//				}
-//			}
+			Graphics g = base.getGraphics();
+			for (ScaleSpacePoint point : pointsBase) {
+				g.setColor(new Color(255, 0, 0));
+				g.drawOval((int) point.getY(), (int) point.getX(), 10, 10);
+			}
 //
-//			File outputfile = new File("saved.bmp");
-//			ImageIO.write(base, "bmp", outputfile);
+			File outputfile = new File("saved.bmp");
+			ImageIO.write(base, "bmp", outputfile);
 
 		} catch (IOException e) {
 		}

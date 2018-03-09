@@ -113,8 +113,8 @@ public class Image {
         this(height, width, DEFAULT_SIGMA, 1.0, 0.0, 0.0);
     }
     
-    public Image(final int height, final int width, double scale) {
-        this(height, width, DEFAULT_SIGMA, scale, 0.0, 0.0);
+    public Image(final int height, final int width, double scale, double sigma) {
+        this(height, width, sigma, scale, 0.0, 0.0);
     }
 
     /**

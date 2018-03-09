@@ -67,14 +67,16 @@ public class ExtremaDetector implements KeypointDetector {
 	 * @return The extremas.
 	 */
 	private Collection<ScaleSpacePoint> detectKeypoints(Image low, Image center, Image high, Image highhigh, Image lowlow) {
-		double partialX, partialY, partialS, hx, hy;
-		double[][] hessian = new double[3][3];
-		double[][] invHessian;
+		int x,y;
+		double partialX, partialY, partialS, offsetX, offsetY, module;
+		double[][] hessian = new double[3][3],
+				invHessian;
+		boolean highContrast;
 		
 		List<ScaleSpacePoint> points = new LinkedList<ScaleSpacePoint>();
 		for (int row = 1; row < center.getHeight() - 1; row++) {
 			for (int col = 1; col < center.getWidth() - 1; col++) {
-
+				highContrast = false;
 				float value = center.getPixel(row, col);
 
 				// Since all neighbors all need to be on the same 'side' for an
@@ -118,8 +120,8 @@ public class ExtremaDetector implements KeypointDetector {
 				if (isExtremum) {
 					Point2D coords = center.toOriginal(new Point2D.Double(row, col));					
 					// Partial Derivatives
-					partialX = (center.getPixel(row + 1, col) - center.getPixel(row - 1, col)) / 2.0f;
-					partialY = (center.getPixel(row, col + 1) - center.getPixel(row, col - 1)) / 2.0f;
+					partialX = (center.getPixel(row, col + 1) - center.getPixel(row, col - 1)) / 2.0f;
+					partialY = (center.getPixel(row + 1, col) - center.getPixel(row - 1, col)) / 2.0f;
 					partialS = (high.getPixel(row, col) - low.getPixel(row, col)) / 2.0f;
 					
 					//Hessian
@@ -136,14 +138,32 @@ public class ExtremaDetector implements KeypointDetector {
 					invHessian = solver.inverse(hessian);
 					
 					//points h = -invH.(dDog/dX)T
-					hx = -(invHessian[0][0]*partialX + invHessian[0][1]*partialY + invHessian[0][2]*partialS);
-					hy = -(invHessian[1][0]*partialX + invHessian[1][1]*partialY + invHessian[1][2]*partialS);
+					offsetX = -(invHessian[0][0]*partialX + invHessian[0][1]*partialY + invHessian[0][2]*partialS);
+					offsetY = -(invHessian[1][0]*partialX + invHessian[1][1]*partialY + invHessian[1][2]*partialS);
 					
-					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), Math.floor(coords.getX()+hx), Math.floor(coords.getY()+hy), center.getSigma());
 					
-					System.out.println(point.toString());
+					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), Math.floor(coords.getX()+offsetX), Math.floor(coords.getY()+offsetY), center.getSigma());
 					
-					points.add(point);
+					//removing low contrast points
+					x = (int)Math.floor(coords.getX()+0.5*partialX*offsetX);
+					y = (int)Math.floor(coords.getY()+0.5*partialY*offsetY);
+					
+					try {
+						module = Math.abs(center.getPixel(y < center.getHeight() ? y : center.getHeight()-1, x < center.getWidth() ? x : center.getWidth()-1));
+					}catch(ArrayIndexOutOfBoundsException aiob) {
+						System.out.println(center.getScale()+" erro " + x+" "+y+" img "+center.getHeight()+" "+center.getWidth());
+						throw new ArrayIndexOutOfBoundsException();
+					}
+					if(module >= 0.03) {
+						highContrast = true;
+					}
+					
+					
+					//remove edge responses
+					if(highContrast && (Math.pow(hessian[0][0]+hessian[1][1], 2) / (hessian[0][0]*hessian[1][1]-Math.pow(hessian[0][1]*hessian[1][0],2))) <= 10) {
+						points.add(point);						
+					}
+//					points.add(point);
 				}
 			}
 		}
@@ -153,7 +173,7 @@ public class ExtremaDetector implements KeypointDetector {
 
 	// Difference Of Gaussian
 	private double dog(int row, int col, Image image) {
-		if(row < 0 || col < 0) return 0.0;
+		if(row < 0 || col < 0 || row == image.getHeight() || col == image.getWidth()) return 0.0;
 		return image.getPixel(row, col);
 	}
 
@@ -162,15 +182,15 @@ public class ExtremaDetector implements KeypointDetector {
 	// (20 June 2008 - 03:07 AM)
 	// first derivative to x
 	private double Fx(int row, int col, Image image) {
-		double fl = dog(row + 1, col, image);
-		double fr = dog(row - 1, col, image);
+		double fr = dog(row, col + 1, image);
+		double fl = dog(row, col - 1, image);
 		return (fr - fl) / (2.0);
 	}
 
 	// first derivative to y
 	private double Fy(int row, int col, Image image) {
-		double fl = dog(row, col + 1, image);
-		double fr = dog(row, col - 1, image);
+		double fr = dog(row + 1, col, image);
+		double fl = dog(row - 1, col, image);
 		return (fr - fl) / (2.0);
 	}
 
@@ -184,15 +204,15 @@ public class ExtremaDetector implements KeypointDetector {
 
 	// second derivative of Fx to x
 	private double Fxx(int row, int col, Image image) {
-		double fl = Fx(row + 1, col, image);
-		double fr = Fx(row - 1, col, image);
+		double fr = Fx(row, col + 1, image);
+		double fl = Fx(row, col - 1, image);
 		return (fr - fl) / (2.0);
 	}
 
 	// second derivative of Fx to y
 	private double Fxy(int row, int col, Image image) {
-		double fl = Fx(row, col+1, image);
-		double fr = Fx(row, col-1, image);
+		double fr = Fx(row + 1, col, image);
+		double fl = Fx(row - 1, col, image);
 		return (fr - fl) / (2.0);
 	}
 
@@ -205,15 +225,15 @@ public class ExtremaDetector implements KeypointDetector {
 	
 	// second derivative of Fy to x
 	private double Fyx(int row, int col, Image image) {
-		double fl = Fy(row+1, col, image);
-		double fr = Fy(row-1, col, image);
+		double fr = Fy(row, col + 1, image);
+		double fl = Fy(row, col - 1, image);
 		return (fr - fl) / (2.0);
 	}
 	
 	// second derivative of Fy to y
 	private double Fyy(int row, int col, Image image) {
-		double fl = Fy(row, col+1, image);
-		double fr = Fy(row, col-1, image);
+		double fr = Fy(row + 1, col, image);
+		double fl = Fy(row - 1, col, image);
 		return (fr - fl) / (2.0);
 	}
 
@@ -227,15 +247,15 @@ public class ExtremaDetector implements KeypointDetector {
 	
 	// second derivative of Fs to x
 	private double Fsx(int row, int col, Image high, Image low) {
-		double fl = Fs(row+1, col, high, low);
-		double fr = Fs(row-1, col, high, low);
+		double fr = Fs(row, col + 1, high, low);
+		double fl = Fs(row, col - 1, high, low);
 		return (fr - fl) / (2.0);
 	}
 	
 	// second derivative of Fs to y
 	private double Fsy(int row, int col, Image high, Image low) {
-		double fl = Fs(row, col+1, high, low);
-		double fr = Fs(row, col-1, high, low);
+		double fr = Fs(row + 1, col, high, low);
+		double fl = Fs(row - 1, col, high, low);
 		return (fr - fl) / (2.0);
 	}
 	

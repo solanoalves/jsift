@@ -15,8 +15,11 @@
  */
 package org.smurn.jsift;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 /**
  * Factory class for scale-spaces.
@@ -24,9 +27,9 @@ import java.util.List;
 public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
 
     /** Number of scales per octave as proposed by Lowe. */
-    private static final int LOWE_SCALES_PER_OCTAVE = 3;
+    private static final int LOWE_SCALES_PER_OCTAVE = 2;
     /** Blur of the first scale-level as proposed by Lowe. */
-    private static final double LOWE_INITIAL_SIGMA = 0.8;
+    private static final double LOWE_INITIAL_SIGMA = 0.5;
 
     /**
      * Creates a scale space for an image using the parameters and algorithms
@@ -107,6 +110,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
         startImage = filter.filter(startImage, initialSigma);
 
         List<Octave> octaves = new ArrayList<Octave>();
+        int i =0;
         while (startImage.getWidth() > 0 && startImage.getHeight() > 0 && startImage.getScale() > Math.pow(2.0, -3.0)) {
             Octave octave = octaveFactory.create(startImage, scalesPerOctave,
                     filter);
@@ -116,6 +120,24 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
             // the next octave.
             Image twiceBlurred = octave.getScaleImages().get(scalesPerOctave);
             startImage = downScaler.downScale(twiceBlurred);
+            
+            System.out.println("DOBRO DE BLUR "+twiceBlurred.getSigma());
+            
+            System.out.println(i+" Octave: "+octave.getScaleImages().size()+" imagens");
+//            for(Image img : octave.getScaleImages()) {
+//            	 try {
+//                 	File outputfile = new File("image_octave"+(i)+".png");
+//     				ImageIO.write(img.toBufferedImage(), "png", outputfile);
+//                 }catch(Exception e) {}
+//            }
+            int j=0;
+            for(Image img : octave.getDifferenceOfGaussians()) {
+           	 try {
+                	File outputfile = new File("dog_octave_"+(i)+"_dif_"+(j++)+".png");
+    				ImageIO.write(img.toBufferedImage(), "png", outputfile);
+                }catch(Exception e) {}
+           }
+            i++;
         }
         
         return new ScaleSpace(octaves);

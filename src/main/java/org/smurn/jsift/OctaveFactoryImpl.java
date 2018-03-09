@@ -15,8 +15,11 @@
  */
 package org.smurn.jsift;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 /**
  *
@@ -55,18 +58,27 @@ public class OctaveFactoryImpl implements OctaveFactory {
         List<Image> scaleImages = new ArrayList<Image>(
                 scalesPerOctave + ADDITIONAL_SCALES + 1);
         scaleImages.add(image);
+        double nextSigma = image.getSigma();
         for (int i = 1; i < scalesPerOctave + ADDITIONAL_SCALES + 1; i++) {
-            double nextSigma = image.getSigma()
-                    * Math.pow(2.0, (double) i / scalesPerOctave);
-            Image scaleImage = filter.filter(scaleImages.get(i - 1), nextSigma);
+            nextSigma = nextSigma * Math.sqrt(2);
+            Image scaleImage = filter.filter(scaleImages.get(i - 1), nextSigma);            
             scaleImages.add(scaleImage);
+            
         }
 
         List<Image> diffOfGaussian = new ArrayList<Image>(scalesPerOctave + 2);
         for (int i = 0; i < scalesPerOctave + ADDITIONAL_SCALES; i++) {
             Image lower = scaleImages.get(i);
             Image higher = scaleImages.get(i + 1);
-            Image dog = higher.subtract(lower);
+            Image dog = lower.subtract(higher);
+            
+            try {
+            	File outputfile = new File("higher_"+(i)+".png");
+            	File outputfile2 = new File("lower_"+(i)+".png");
+				ImageIO.write(higher.toBufferedImage(), "png", outputfile);
+				ImageIO.write(lower.toBufferedImage(), "png", outputfile2);
+            }catch(Exception e) {}
+            
             diffOfGaussian.add(dog);
         }
 
