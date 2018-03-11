@@ -37,6 +37,10 @@ public class Subsampler implements DownScaler {
      */
     @Override
     public Image downScale(final Image image) {
+    	return downScale(image, image.getSigma());
+    }
+    @Override
+    public Image downScale(final Image image, double sigma) {
         if (image == null) {
             throw new NullPointerException("image must not be null");
         }
@@ -47,7 +51,7 @@ public class Subsampler implements DownScaler {
         int width = (image.getWidth() + 1) / 2;
         int height = (image.getHeight() + 1) / 2;
 
-        Image result = new Image(height, width, image.getSigma(),
+        Image result = new Image(height, width, sigma,
                 image.getScale() / 2.0,
                 image.getOffsetX() / 2.0,
                 image.getOffsetY() / 2.0);

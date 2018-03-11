@@ -31,5 +31,6 @@ public interface DownScaler {
      * @throws IllegalArgumentException if the image is not at least one pixel
      * in width and height.
      */
-    Image downScale(Image image);
+	Image downScale(Image image);
+    Image downScale(Image image, double sigma);
 }

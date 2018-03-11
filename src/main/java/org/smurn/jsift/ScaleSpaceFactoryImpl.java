@@ -29,7 +29,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
     /** Number of scales per octave as proposed by Lowe. */
     private static final int LOWE_SCALES_PER_OCTAVE = 2;
     /** Blur of the first scale-level as proposed by Lowe. */
-    private static final double LOWE_INITIAL_SIGMA = 0.5;
+    private static final double LOWE_INITIAL_SIGMA = 0.8;
 
     /**
      * Creates a scale space for an image using the parameters and algorithms
@@ -112,7 +112,8 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
         List<Octave> octaves = new ArrayList<Octave>();
         int i =0;
         while (startImage.getWidth() > 0 && startImage.getHeight() > 0 && startImage.getScale() > Math.pow(2.0, -3.0)) {
-            Octave octave = octaveFactory.create(startImage, scalesPerOctave,
+            System.out.println("Criando octave com sigma "+startImage.getSigma()+" e scale "+startImage.getScale());
+        	Octave octave = octaveFactory.create(startImage, scalesPerOctave,
                     filter);
             octaves.add(octave);
 
@@ -120,16 +121,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
             // the next octave.
             Image twiceBlurred = octave.getScaleImages().get(scalesPerOctave);
             startImage = downScaler.downScale(twiceBlurred);
-            
-            System.out.println("DOBRO DE BLUR "+twiceBlurred.getSigma());
-            
-            System.out.println(i+" Octave: "+octave.getScaleImages().size()+" imagens");
-//            for(Image img : octave.getScaleImages()) {
-//            	 try {
-//                 	File outputfile = new File("image_octave"+(i)+".png");
-//     				ImageIO.write(img.toBufferedImage(), "png", outputfile);
-//                 }catch(Exception e) {}
-//            }
+
             int j=0;
             for(Image img : octave.getDifferenceOfGaussians()) {
            	 try {

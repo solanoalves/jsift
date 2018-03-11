@@ -34,7 +34,7 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-			BufferedImage base = ImageIO.read(new File("lena90.jpg"));
+		BufferedImage base = ImageIO.read(new File("lena.jpg"));
 //			BufferedImage target = ImageIO.read(new File("olho.bmp"));
 
 			Image imgBase = new Image(base);
@@ -56,11 +56,11 @@ public class ImageTest {
 			Graphics g = base.getGraphics();
 			for (ScaleSpacePoint point : pointsBase) {
 				g.setColor(new Color(255, 0, 0));
-				g.drawOval((int) point.getY(), (int) point.getX(), 10, 10);
+				g.drawOval((int) point.getySub(), (int) point.getxSub(), 10, 10);
 			}
 //
-			File outputfile = new File("saved.bmp");
-			ImageIO.write(base, "bmp", outputfile);
+			File outputfile = new File("saved.jpg");
+			ImageIO.write(base, "jpg", outputfile);
 
 		} catch (IOException e) {
 		}

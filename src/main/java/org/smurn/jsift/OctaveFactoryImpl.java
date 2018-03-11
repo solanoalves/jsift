@@ -15,11 +15,8 @@
  */
 package org.smurn.jsift;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 /**
  *
@@ -70,14 +67,7 @@ public class OctaveFactoryImpl implements OctaveFactory {
         for (int i = 0; i < scalesPerOctave + ADDITIONAL_SCALES; i++) {
             Image lower = scaleImages.get(i);
             Image higher = scaleImages.get(i + 1);
-            Image dog = lower.subtract(higher);
-            
-            try {
-            	File outputfile = new File("higher_"+(i)+".png");
-            	File outputfile2 = new File("lower_"+(i)+".png");
-				ImageIO.write(higher.toBufferedImage(), "png", outputfile);
-				ImageIO.write(lower.toBufferedImage(), "png", outputfile2);
-            }catch(Exception e) {}
+            Image dog = higher.subtract(lower);
             
             diffOfGaussian.add(dog);
         }

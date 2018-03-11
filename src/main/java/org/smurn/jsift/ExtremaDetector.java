@@ -74,6 +74,7 @@ public class ExtremaDetector implements KeypointDetector {
 		boolean highContrast;
 		
 		List<ScaleSpacePoint> points = new LinkedList<ScaleSpacePoint>();
+		System.out.println("Total pixels "+center.getHeight()*center.getWidth());
 		for (int row = 1; row < center.getHeight() - 1; row++) {
 			for (int col = 1; col < center.getWidth() - 1; col++) {
 				highContrast = false;
@@ -86,7 +87,7 @@ public class ExtremaDetector implements KeypointDetector {
 				if (sign == 0.0f) {
 					break;
 				}
-				value *= sign;
+				value *= sign;				
 				boolean isExtremum = true;
 				isExtremum &= low.getPixel(row - 1, col - 1) * sign < value;
 				isExtremum &= low.getPixel(row - 1, col) * sign < value;
@@ -117,8 +118,10 @@ public class ExtremaDetector implements KeypointDetector {
 				isExtremum &= high.getPixel(row + 1, col) * sign < value;
 				isExtremum &= high.getPixel(row + 1, col + 1) * sign < value;
 
-				if (isExtremum) {
-					Point2D coords = center.toOriginal(new Point2D.Double(row, col));					
+				if (isExtremum) {					
+					Point2D coords = center.toOriginal(new Point2D.Double(row, col));
+					
+					/*
 					// Partial Derivatives
 					partialX = (center.getPixel(row, col + 1) - center.getPixel(row, col - 1)) / 2.0f;
 					partialY = (center.getPixel(row + 1, col) - center.getPixel(row - 1, col)) / 2.0f;
@@ -149,9 +152,8 @@ public class ExtremaDetector implements KeypointDetector {
 					y = (int)Math.floor(coords.getY()+0.5*partialY*offsetY);
 					
 					try {
-						module = Math.abs(center.getPixel(y < center.getHeight() ? y : center.getHeight()-1, x < center.getWidth() ? x : center.getWidth()-1));
+						module = center.getPixel(y < center.getHeight() ? y : center.getHeight()-1, x < center.getWidth() ? x : center.getWidth()-1);
 					}catch(ArrayIndexOutOfBoundsException aiob) {
-						System.out.println(center.getScale()+" erro " + x+" "+y+" img "+center.getHeight()+" "+center.getWidth());
 						throw new ArrayIndexOutOfBoundsException();
 					}
 					if(module >= 0.03) {
@@ -163,7 +165,9 @@ public class ExtremaDetector implements KeypointDetector {
 					if(highContrast && (Math.pow(hessian[0][0]+hessian[1][1], 2) / (hessian[0][0]*hessian[1][1]-Math.pow(hessian[0][1]*hessian[1][0],2))) <= 10) {
 						points.add(point);						
 					}
-//					points.add(point);
+					*/
+					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), coords.getX(), coords.getY(), center.getSigma());
+					points.add(point);
 				}
 			}
 		}
