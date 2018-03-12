@@ -38,6 +38,7 @@ public class ExtremaDetector implements KeypointDetector {
 		}
 
 		List<ScaleSpacePoint> points = new ArrayList<ScaleSpacePoint>();
+		
 		for (Octave octave : scaleSpace.getOctaves()) {
 
 			int dogCount = octave.getDifferenceOfGaussians().size();
@@ -49,6 +50,7 @@ public class ExtremaDetector implements KeypointDetector {
 						(i+2 < dogCount-1 ? octave.getDifferenceOfGaussians().get(i + 2) : null),
 						(i-2 > 0 ? octave.getDifferenceOfGaussians().get(i - 2) : null));
 				points.addAll(pointsOnThisScale);
+				
 			}
 		}
 
@@ -119,9 +121,6 @@ public class ExtremaDetector implements KeypointDetector {
 				isExtremum &= high.getPixel(row + 1, col + 1) * sign < value;
 
 				if (isExtremum) {					
-					Point2D coords = center.toOriginal(new Point2D.Double(row, col));
-					
-					/*
 					// Partial Derivatives
 					partialX = (center.getPixel(row, col + 1) - center.getPixel(row, col - 1)) / 2.0f;
 					partialY = (center.getPixel(row + 1, col) - center.getPixel(row - 1, col)) / 2.0f;
@@ -143,13 +142,14 @@ public class ExtremaDetector implements KeypointDetector {
 					//points h = -invH.(dDog/dX)T
 					offsetX = -(invHessian[0][0]*partialX + invHessian[0][1]*partialY + invHessian[0][2]*partialS);
 					offsetY = -(invHessian[1][0]*partialX + invHessian[1][1]*partialY + invHessian[1][2]*partialS);
+
+					Point2D coords = center.toOriginal(new Point2D.Double(row+offsetY, col+offsetX));
 					
-					
-					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), Math.floor(coords.getX()+offsetX), Math.floor(coords.getY()+offsetY), center.getSigma());
+					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), coords.getX(), coords.getY(), center.getSigma());
 					
 					//removing low contrast points
-					x = (int)Math.floor(coords.getX()+0.5*partialX*offsetX);
-					y = (int)Math.floor(coords.getY()+0.5*partialY*offsetY);
+					x = (int)Math.floor(col+0.5*partialX*offsetX);
+					y = (int)Math.floor(row+0.5*partialY*offsetY);
 					
 					try {
 						module = center.getPixel(y < center.getHeight() ? y : center.getHeight()-1, x < center.getWidth() ? x : center.getWidth()-1);
@@ -160,14 +160,10 @@ public class ExtremaDetector implements KeypointDetector {
 						highContrast = true;
 					}
 					
-					
 					//remove edge responses
 					if(highContrast && (Math.pow(hessian[0][0]+hessian[1][1], 2) / (hessian[0][0]*hessian[1][1]-Math.pow(hessian[0][1]*hessian[1][0],2))) <= 10) {
 						points.add(point);						
 					}
-					*/
-					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), coords.getX(), coords.getY(), center.getSigma());
-					points.add(point);
 				}
 			}
 		}

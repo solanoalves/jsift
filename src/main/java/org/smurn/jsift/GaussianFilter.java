@@ -55,7 +55,6 @@ public final class GaussianFilter implements LowPassFilter {
         if (sigma < image.getSigma()) {
             throw new IllegalArgumentException("cannot reduce sigma");
         }
-        System.out.println("Filtro: "+sigma);
         // The sigma parameter and the image's sigma value are relative to the
         // original image, so we need to transform this into
         // the coordinate space of this image.

@@ -34,7 +34,7 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-		BufferedImage base = ImageIO.read(new File("lena.jpg"));
+		BufferedImage base = ImageIO.read(new File("lena90.jpg"));
 //			BufferedImage target = ImageIO.read(new File("olho.bmp"));
 
 			Image imgBase = new Image(base);

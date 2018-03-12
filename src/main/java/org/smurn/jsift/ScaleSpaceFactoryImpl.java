@@ -15,11 +15,8 @@
  */
 package org.smurn.jsift;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 /**
  * Factory class for scale-spaces.
@@ -110,9 +107,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
         startImage = filter.filter(startImage, initialSigma);
 
         List<Octave> octaves = new ArrayList<Octave>();
-        int i =0;
         while (startImage.getWidth() > 0 && startImage.getHeight() > 0 && startImage.getScale() > Math.pow(2.0, -3.0)) {
-            System.out.println("Criando octave com sigma "+startImage.getSigma()+" e scale "+startImage.getScale());
         	Octave octave = octaveFactory.create(startImage, scalesPerOctave,
                     filter);
             octaves.add(octave);
@@ -121,15 +116,6 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
             // the next octave.
             Image twiceBlurred = octave.getScaleImages().get(scalesPerOctave);
             startImage = downScaler.downScale(twiceBlurred);
-
-            int j=0;
-            for(Image img : octave.getDifferenceOfGaussians()) {
-           	 try {
-                	File outputfile = new File("dog_octave_"+(i)+"_dif_"+(j++)+".png");
-    				ImageIO.write(img.toBufferedImage(), "png", outputfile);
-                }catch(Exception e) {}
-           }
-            i++;
         }
         
         return new ScaleSpace(octaves);
