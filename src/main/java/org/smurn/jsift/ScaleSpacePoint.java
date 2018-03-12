@@ -25,12 +25,8 @@ public final class ScaleSpacePoint {
 
     /** x-coordinate. */
     private final double x;
-    /** sub-x-coordinate. */
-    private final double xSub;
     /** y-coordinate. */
     private final double y;
-    /** sub-y-coordinate. */
-    private final double ySub;
     /** scale-coordinate. */
     private final double sigma;
 
@@ -40,10 +36,8 @@ public final class ScaleSpacePoint {
      * @param y pixel-centric coordinate in the original image.
      * @param sigma Scale coordinate.
      */
-    public ScaleSpacePoint(double x, double y, double xSub, double ySub, double sigma) {
+    public ScaleSpacePoint(double x, double y, double sigma) {
         this.x = x;
-        this.xSub = xSub;
-        this.ySub = ySub;
         this.y = y;
         this.sigma = sigma;
     }
@@ -72,17 +66,9 @@ public final class ScaleSpacePoint {
         return y;
     }
 
-    public double getxSub() {
-		return xSub;
-	}
-
-	public double getySub() {
-		return ySub;
-	}
-
 	@Override
     public String toString() {
-        return "(x=" + x + " y=" + y + " s=" + sigma + ") (xSub=" +xSub+" ySub="+ySub+")" ;
+        return "(x=" + x + " y=" + y + " s=" + sigma + ")" ;
     }
 
     @Override

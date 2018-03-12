@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.math.linear.SingularMatrixException;
+
 /**
  * Strategy that detects local extrema in a scale-space. The strategy searches
  * all pixels in the difference-of-gaussian images and returns the positions of
@@ -31,7 +33,7 @@ public class ExtremaDetector implements KeypointDetector {
 	public static final LUSolver3 solver = new LUSolver3();
 	
 	@Override
-	public Collection<ScaleSpacePoint> detectKeypoints(final ScaleSpace scaleSpace) {
+	public Collection<ScaleSpacePoint> detectKeypoints(final ScaleSpace scaleSpace) throws Exception {
 
 		if (scaleSpace == null) {
 			throw new NullPointerException("scale space must not be null");
@@ -67,8 +69,9 @@ public class ExtremaDetector implements KeypointDetector {
 	 * @param high
 	 *            The DoG at one scale higher.
 	 * @return The extremas.
+	 * @throws Exception 
 	 */
-	private Collection<ScaleSpacePoint> detectKeypoints(Image low, Image center, Image high, Image highhigh, Image lowlow) {
+	private Collection<ScaleSpacePoint> detectKeypoints(Image low, Image center, Image high, Image highhigh, Image lowlow) throws Exception {
 		int x,y;
 		double partialX, partialY, partialS, offsetX, offsetY, module;
 		double[][] hessian = new double[3][3],
@@ -76,7 +79,6 @@ public class ExtremaDetector implements KeypointDetector {
 		boolean highContrast;
 		
 		List<ScaleSpacePoint> points = new LinkedList<ScaleSpacePoint>();
-		System.out.println("Total pixels "+center.getHeight()*center.getWidth());
 		for (int row = 1; row < center.getHeight() - 1; row++) {
 			for (int col = 1; col < center.getWidth() - 1; col++) {
 				highContrast = false;
@@ -137,7 +139,11 @@ public class ExtremaDetector implements KeypointDetector {
 					hessian[2][1] = Fsy(row, col, high, low);
 					hessian[2][2] = Fss(row, col, highhigh, center, lowlow);
 					
-					invHessian = solver.inverse(hessian);
+					try {
+						invHessian = solver.inverse(hessian);
+					}catch(SingularMatrixException sme) {
+						continue;
+					}
 					
 					//points h = -invH.(dDog/dX)T
 					offsetX = -(invHessian[0][0]*partialX + invHessian[0][1]*partialY + invHessian[0][2]*partialS);
@@ -145,7 +151,7 @@ public class ExtremaDetector implements KeypointDetector {
 
 					Point2D coords = center.toOriginal(new Point2D.Double(row+offsetY, col+offsetX));
 					
-					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), coords.getX(), coords.getY(), center.getSigma());
+					ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), center.getSigma());
 					
 					//removing low contrast points
 					x = (int)Math.floor(col+0.5*partialX*offsetX);

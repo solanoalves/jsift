@@ -30,5 +30,5 @@ public interface KeypointDetector {
      * implementation.
      * @throws NullPointerException if {@code scaleSpace} is {@code null}.
      */
-    public Collection<ScaleSpacePoint> detectKeypoints(ScaleSpace scaleSpace);
+    public Collection<ScaleSpacePoint> detectKeypoints(ScaleSpace scaleSpace) throws Exception;
 }

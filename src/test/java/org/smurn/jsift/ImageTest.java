@@ -19,8 +19,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -34,35 +34,40 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-		BufferedImage base = ImageIO.read(new File("lena90.jpg"));
-//			BufferedImage target = ImageIO.read(new File("olho.bmp"));
+			BufferedImage base = ImageIO.read(new File("dennys.png"));
+			// BufferedImage target = ImageIO.read(new File("olho.bmp"));
 
 			Image imgBase = new Image(base);
-//			Image imgTarget = new Image(target);
+			// Image imgTarget = new Image(target);
 
 			// Cria o scalespace com as octaves (4 octaves com 5 imgs cada)
 			ScaleSpaceFactoryImpl spaceFac = new ScaleSpaceFactoryImpl();
 			ScaleSpace ssBase = spaceFac.create(imgBase);
-//			ScaleSpace ssTarget = spaceFac.create(imgTarget);
-//
+			// ScaleSpace ssTarget = spaceFac.create(imgTarget);
+			//
 			ExtremaDetector extremaDetector = new ExtremaDetector();
 			Collection<ScaleSpacePoint> pointsBase = extremaDetector.detectKeypoints(ssBase);
-//			for (ScaleSpacePoint pointBase : pointsBase) {
-//			System.out.println("("+pointBase.getX()+","+pointBase.getY()+","+pointBase.getSigma()+")");
-//			}
-			System.out.println("total "+pointsBase.size());
-//			Collection<ScaleSpacePoint> pointsTarget = extremaDetector.detectKeypoints(ssTarget);
-//
+			List<Keypoint> keypoints = KeypointOrientation.calculate(pointsBase, ssBase.getOctaves().get(1));
+			// for (ScaleSpacePoint pointBase : pointsBase) {
+			// System.out.println("("+pointBase.getX()+","+pointBase.getY()+","+pointBase.getSigma()+")");
+			// }
+			System.out.println("total " + keypoints.size());
+			// Collection<ScaleSpacePoint> pointsTarget =
+			// extremaDetector.detectKeypoints(ssTarget);
+			//
 			Graphics g = base.getGraphics();
-			for (ScaleSpacePoint point : pointsBase) {
+			int mag = 0;
+			for (Keypoint point : keypoints) {
 				g.setColor(new Color(255, 0, 0));
-				g.drawOval((int) point.getySub(), (int) point.getxSub(), 10, 10);
+				mag = (int)(20*point.getMagnitude());
+				g.drawOval((int) point.getPoint().getY(), (int) point.getPoint().getX(), mag, mag);
 			}
-//
-			File outputfile = new File("saved.jpg");
-			ImageIO.write(base, "jpg", outputfile);
+			//
+			File outputfile = new File("saved.png");
+			ImageIO.write(base, "png", outputfile);
 
-		} catch (IOException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 }
