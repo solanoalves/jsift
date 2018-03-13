@@ -47,7 +47,7 @@ public class ImageTest {
 			//
 			ExtremaDetector extremaDetector = new ExtremaDetector();
 			Collection<ScaleSpacePoint> pointsBase = extremaDetector.detectKeypoints(ssBase);
-			List<Keypoint> keypoints = KeypointOrientation.calculate(pointsBase, ssBase.getOctaves().get(1));
+			List<Keypoint> keypoints = KeypointsGenerator.calculate(pointsBase, ssBase.getOctaves().get(1));
 			// for (ScaleSpacePoint pointBase : pointsBase) {
 			// System.out.println("("+pointBase.getX()+","+pointBase.getY()+","+pointBase.getSigma()+")");
 			// }

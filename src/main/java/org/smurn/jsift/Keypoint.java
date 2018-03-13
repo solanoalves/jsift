@@ -4,11 +4,13 @@ public class Keypoint {
 	ScaleSpacePoint point;
 	double magnitude;
 	int direction;
+	double[] descriptor;
 	
-	public Keypoint(ScaleSpacePoint point, double magnitude, int direction) {
+	public Keypoint(ScaleSpacePoint point, double magnitude, int direction, double[] descriptor) {
 		this.point = point;
 		this.magnitude = magnitude;
 		this.direction = direction;
+		this.descriptor = descriptor;
 	}
 
 	public ScaleSpacePoint getPoint() {
@@ -33,5 +35,13 @@ public class Keypoint {
 
 	public void setDirection(int direction) {
 		this.direction = direction;
+	}
+
+	public double[] getDescriptor() {
+		return descriptor;
+	}
+
+	public void setDescriptor(double[] descriptor) {
+		this.descriptor = descriptor;
 	}
 }
