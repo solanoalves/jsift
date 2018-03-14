@@ -17,7 +17,6 @@ package org.smurn.jsift;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Collection;
@@ -102,20 +101,19 @@ public class ImageTest {
 			g.setColor(new Color(255, 255, 255));
 			int r = 0;
 			for(Keypoint kb : keypointsBase) {
-				r = 14;
+				r = (int)(500*kb.getMagnitude());
 				g.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
-				g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(Math.toRadians(kb.getDirection()*10))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(Math.toRadians(kb.getDirection()*10))));
+				g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
 			}
 			File outputfile = new File("saved1.png");
 			ImageIO.write(bi, "png", outputfile);
-			BufferedImage bi2 = imgBase.toBufferedImage();
+			BufferedImage bi2 = imgTarget.toBufferedImage();
 			Graphics g2 = bi2.getGraphics();
 			g2.setColor(new Color(255, 255, 255));
-			int r2 = 0;
 			for(Keypoint kb : keypointsTarget) {
-				r = 14;
-				g.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
-				g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(Math.toRadians(kb.getDirection()*10))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(Math.toRadians(kb.getDirection()*10))));
+				r = (int)(1500*kb.getMagnitude());
+				g2.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
+				g2.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
 			}
 			File outputfile2 = new File("saved2.png");
 			ImageIO.write(bi2, "png", outputfile2);

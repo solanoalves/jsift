@@ -4,12 +4,14 @@ public class Keypoint {
 	ScaleSpacePoint point;
 	double magnitude;
 	int direction;
+	double dominant;
 	double[] descriptor;
 	
-	public Keypoint(ScaleSpacePoint point, double magnitude, int direction, double[] descriptor) {
+	public Keypoint(ScaleSpacePoint point, double magnitude, int direction, double dominant, double[] descriptor) {
 		this.point = point;
 		this.magnitude = magnitude;
 		this.direction = direction;
+		this.dominant = dominant;
 		this.descriptor = descriptor;
 	}
 
@@ -35,6 +37,14 @@ public class Keypoint {
 
 	public void setDirection(int direction) {
 		this.direction = direction;
+	}
+
+	public double getDominant() {
+		return dominant;
+	}
+
+	public void setDominant(double dominant) {
+		this.dominant = dominant;
 	}
 
 	public double[] getDescriptor() {

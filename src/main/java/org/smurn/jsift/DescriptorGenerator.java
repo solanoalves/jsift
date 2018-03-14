@@ -7,14 +7,14 @@ public class DescriptorGenerator {
 		//descriptor
 		double[] desc = new double[128];
 		Arrays.fill(desc, 0.0);
-		int offset = 0, c, r=-1;
-		for(int row = centerY - 7; row < centerY+8; row++) {
+		int offset = 0, c=0, r=-1;
+		for(int row = centerY - 8; row < centerY+8; row++) {
 			r++;
 			c=-1;
 			if(! (row > 0 && row < mag.length)) {
 				continue;
 			}
-			for(int col = centerX-7; col < centerX+8; col++) {
+			for(int col = centerX-8; col < centerX+8; col++) {
 				c++;
 				if(! (col > 0 && col < mag[0].length) || mag[row][col] == 0) {
 					continue;
@@ -27,7 +27,7 @@ public class DescriptorGenerator {
 				if(desc[offset + radianToBin(theta[row][col], keypointDirection)] > 0.2)
 					desc[offset + radianToBin(theta[row][col], keypointDirection)] = 0.2;					
 			}
-		}			
+		}
 		normalize(desc);		
 		return desc;
 	}

@@ -37,15 +37,16 @@ public class KeypointsGenerator {
 					mag[r][c] = 
 								(row+1 < image.getHeight() && row-1 > -1 && col+1 < image.getWidth() && col-1 > -1) 
 							? 
-								Math.sqrt( Math.pow(image.getPixel(row, col+1)-image.getPixel(row, col-1), 2) + Math.pow(image.getPixel(row+1, col)-image.getPixel(row-1, col), 2) )
+								Math.sqrt( Math.pow(image.getPixel(row, col+1)-image.getPixel(row, col-1), 2) + Math.pow(image.getPixel(row-1, col)-image.getPixel(row+1, col), 2) )
 							:
 								0.0;
 					theta[r][c] =
 							(row+1 < image.getHeight() && row-1 > -1 && col+1 < image.getWidth() && col-1 > -1) 
 							? 
-								Math.atan2( (image.getPixel(row+1, col)-image.getPixel(row-1, col)) , image.getPixel(row, col+1)-image.getPixel(row, col-1) )
+								Math.atan2( (image.getPixel(row-1, col)-image.getPixel(row+1, col)) , image.getPixel(row, col+1)-image.getPixel(row, col-1) )
 							:
 								0.0;
+					theta[r][c] = theta[r][c] < 0 ? (2*Math.PI-theta[r][c]) : theta[r][c]; 
 					hist[ radianToBin(theta[r][c]) ] +=
 							(row < image.getHeight() && row > 0 && col < image.getWidth() && col > 0) 
 							? 
@@ -71,7 +72,8 @@ public class KeypointsGenerator {
 	}
 	
 	private static int radianToBin(double radian) {
-		return (int)((Math.toDegrees(radian) + 360) % 360)/10;
+		radian = radian > Math.PI*2 ? radian-2*Math.PI : radian;
+		return (int)(radian / (Math.PI/18.0));
 	}
 	
 	private static List<Keypoint> generateKeyPointDescriptor(double[] histogram, ScaleSpacePoint point, double[][] mag, double[][] theta, int cC, int rC){
@@ -81,22 +83,22 @@ public class KeypointsGenerator {
 		for(int i = 0; i < histogram.length; i++) {
 			if(histogram[i] > max) {
 				max = histogram[i];
-				orientation = i+1;
+				orientation = i;
 			}
 		}
 		for(int i = 0; i < histogram.length; i++) {
 			if(histogram[i] != max && histogram[i] > max*0.8) {
 				max80 = histogram[i];
-				orientation80 = i+1;
+				orientation80 = i;
 			}
 		}
 		if(orientation > 0 && max > 0) {
 			double[] desc = DescriptorGenerator.generate(orientation, mag, theta, cC, rC);
-			keypoints.add(new Keypoint(point, max, orientation, desc));
+			keypoints.add(new Keypoint(point, max, orientation, theta[rC][cC], desc));
 		}
 		if(orientation80 > 0 && max80 > 0) {
 			double[] desc80 = DescriptorGenerator.generate(orientation80, mag, theta, cC, rC);
-			keypoints.add(new Keypoint(point, max80, orientation80, desc80));
+			keypoints.add(new Keypoint(point, max80, orientation80, theta[rC][cC], desc80));
 		}
 		
 		return keypoints;
