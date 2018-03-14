@@ -464,8 +464,7 @@ public class Image {
                 scale, offsetX, offsetY);
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
-                float d = Math.abs(getPixel(row, col)
-                        - subtrahend.getPixel(row, col));
+                float d = getPixel(row, col) - subtrahend.getPixel(row, col);
                 difference.setPixel(row, col, d);
             }
         }

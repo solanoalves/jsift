@@ -35,32 +35,44 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-			BufferedImage base = ImageIO.read(new File("lena.jpg"));
-			 BufferedImage target = ImageIO.read(new File("lena90.jpg"));
-
-			Image imgBase = new Image(base);
-			Image imgTarget = new Image(target);
-			BufferedImage result = new BufferedImage(imgBase.getWidth()+imgTarget.getWidth(), imgBase.getHeight()+imgTarget.getHeight(), imgBase.toBufferedImage().getType());
-
-			
 			ScaleSpaceFactoryImpl spaceFac = new ScaleSpaceFactoryImpl();
-			
-			// Cria o scalespace com as octaves (4 octaves com 5 imgs cada)
-			ScaleSpace ssBase = spaceFac.create(imgBase);
-			ScaleSpace ssTarget = spaceFac.create(imgTarget);
-			
-			
 			ExtremaDetector extremaDetector = new ExtremaDetector();
 			
-			
+			BufferedImage base = ImageIO.read(new File("lena.jpg"));
+			Image imgBase = new Image(base);
+			ScaleSpace ssBase = spaceFac.create(imgBase);
 			Collection<ScaleSpacePoint> pointsBase = extremaDetector.detectKeypoints(ssBase);
+			List<Keypoint> keypointsBase = KeypointsGenerator.calculate(pointsBase, ssBase.getOctaves());
+			
+			BufferedImage target = ImageIO.read(new File("lena90.jpg"));
+			Image imgTarget = new Image(target);
+			ScaleSpace ssTarget = spaceFac.create(imgTarget);
 			Collection<ScaleSpacePoint> pointsTarget = extremaDetector.detectKeypoints(ssTarget);
+			List<Keypoint> keypointsTarget = KeypointsGenerator.calculate(pointsTarget, ssTarget.getOctaves());
+
+			BufferedImage result = new BufferedImage(imgBase.getWidth()+imgTarget.getWidth(), imgBase.getHeight()+imgTarget.getHeight(), imgBase.toBufferedImage().getType());
 			
+			System.out.println("points: "+pointsBase.size()+" e "+pointsTarget.size());
+			System.out.println("keypoints: "+keypointsBase.size()+" e "+keypointsTarget.size());
 			
-			List<Keypoint> keypointsBase = KeypointsGenerator.calculate(pointsBase, ssBase.getOctaves().get(1));
-			List<Keypoint> keypointsTarget = KeypointsGenerator.calculate(pointsTarget, ssTarget.getOctaves().get(1));
+//			//Pontos
+//			BufferedImage bio1 = imgBase.toBufferedImage();
+//			Graphics go1 = bio1.getGraphics();
+//			go1.setColor(new Color(255, 255, 255));
+//			for(ScaleSpacePoint point : pointsBase) {
+//				go1.drawOval((int)point.getX()-7, (int)point.getY()-7, 14, 14);
+//			}
+//			File outputfileo1 = new File("saved_1.png");
+//			ImageIO.write(bio1, "png", outputfileo1);
+//			BufferedImage bio2 = imgTarget.toBufferedImage();
+//			Graphics go2 = bio2.getGraphics();
+//			go2.setColor(new Color(255, 255, 255));
+//			for(ScaleSpacePoint point : pointsTarget) {
+//				go2.drawOval((int)point.getX()-7, (int)point.getY()-7, 14, 14);
+//			}
+//			File outputfileo2 = new File("saved_2.png");
+//			ImageIO.write(bio2, "png", outputfileo2);
 			
-			System.out.println(keypointsBase.size()+" x "+keypointsTarget.size());
 			
 			//Desenha
 //			Graphics g = result.getGraphics();
@@ -68,28 +80,45 @@ public class ImageTest {
 //			drawer.setBackground(Color.WHITE);
 //			drawer.clearRect(0,0,result.getWidth(),result.getHeight());
 //			g.drawImage(imgBase.toBufferedImage(), 0, 0, null);
-//			g.drawImage(imgTarget.toBufferedImage(), imgBase.getWidth(), 0, null);			
+//			g.drawImage(imgTarget.toBufferedImage(), imgBase.getWidth(), 0, null);
+//			g.setColor(new Color(255, 255, 255));
+//			double dist = 0;
 //			for(Keypoint kb : keypointsBase) {
 //				for(Keypoint kt : keypointsTarget) {
-//					if(EuclideanDistance.calculate(kb.getDescriptor(), kt.getDescriptor()) < 1) {
-//						g.setColor(new Color(255, 0, 0));
-//						g.drawOval((int)kb.getPoint().getY(), (int)kb.getPoint().getX(), 10, 10);
-//						g.drawOval(imgBase.getWidth()+(int)kt.getPoint().getY(), (int)kt.getPoint().getX(), 10, 10);
-////						g.drawLine((int)kb.getPoint().getY(), (int)kb.getPoint().getX(), ((int)kt.getPoint().getY())+imgBase.toBufferedImage().getWidth(), (int)kt.getPoint().getX());
+//					dist = EuclideanDistance.calculate(kb.getDescriptor(), kt.getDescriptor()); 
+//					if(dist < 0.05) {
+//						g.drawOval((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), 10, 10);
+//						g.drawOval(imgBase.getWidth()+(int)kt.getPoint().getX(), (int)kt.getPoint().getY(), 10, 10);
+//						g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), ((int)kt.getPoint().getX())+imgBase.toBufferedImage().getWidth(), (int)kt.getPoint().getY());
 //						break;
 //					}
 //				}
 //			}
+//			File outputfile = new File("saved.png");
+//			ImageIO.write(result, "png", outputfile);
 			
-			BufferedImage bi = imgTarget.toBufferedImage();
+			BufferedImage bi = imgBase.toBufferedImage();
 			Graphics g = bi.getGraphics();
-			for(Keypoint kb : keypointsTarget) {
-				g.setColor(new Color(255, 255, 255));
-				g.drawOval((int)kb.getPoint().getY(), (int)kb.getPoint().getX(), 10, 10);
+			g.setColor(new Color(255, 255, 255));
+			int r = 0;
+			for(Keypoint kb : keypointsBase) {
+				r = 14;
+				g.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
+				g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(Math.toRadians(kb.getDirection()*10))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(Math.toRadians(kb.getDirection()*10))));
 			}
-			
-			File outputfile = new File("saved.png");
+			File outputfile = new File("saved1.png");
 			ImageIO.write(bi, "png", outputfile);
+			BufferedImage bi2 = imgBase.toBufferedImage();
+			Graphics g2 = bi2.getGraphics();
+			g2.setColor(new Color(255, 255, 255));
+			int r2 = 0;
+			for(Keypoint kb : keypointsTarget) {
+				r = 14;
+				g.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
+				g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(Math.toRadians(kb.getDirection()*10))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(Math.toRadians(kb.getDirection()*10))));
+			}
+			File outputfile2 = new File("saved2.png");
+			ImageIO.write(bi2, "png", outputfile2);
 
 		} catch (Exception e) {
 			e.printStackTrace();

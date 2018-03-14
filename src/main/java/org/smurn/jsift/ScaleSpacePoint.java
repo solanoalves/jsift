@@ -29,6 +29,8 @@ public final class ScaleSpacePoint {
     private final double y;
     /** scale-coordinate. */
     private final double sigma;
+    private final int octave;
+    private final int scale;
 
     /**
      * Creates an instance.
@@ -36,10 +38,12 @@ public final class ScaleSpacePoint {
      * @param y pixel-centric coordinate in the original image.
      * @param sigma Scale coordinate.
      */
-    public ScaleSpacePoint(double x, double y, double sigma) {
+    public ScaleSpacePoint(double x, double y, double sigma, int octave, int scale) {
         this.x = x;
         this.y = y;
         this.sigma = sigma;
+        this.octave = octave;
+        this.scale = scale;
     }
 
     /**
@@ -65,6 +69,14 @@ public final class ScaleSpacePoint {
     public double getY() {
         return y;
     }
+
+	public int getOctave() {
+		return octave;
+	}
+
+	public int getScale() {
+		return scale;
+	}
 
 	@Override
     public String toString() {
