@@ -111,7 +111,7 @@ public class ImageTest {
 			Graphics g2 = bi2.getGraphics();
 			g2.setColor(new Color(255, 255, 255));
 			for(Keypoint kb : keypointsTarget) {
-				r = (int)(1500*kb.getMagnitude());
+				r = (int)(500*kb.getMagnitude());
 				g2.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
 				g2.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
 			}

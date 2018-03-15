@@ -15,7 +15,7 @@ public class KeypointsGenerator {
 		double[][] mag, theta;
 		double[] hist;		
 		for(ScaleSpacePoint keypoint : scaleSpacePoints) {
-			Image image = octaves.get(keypoint.getOctave()).getScaleImages().get(keypoint.getScale());
+			Image image = octaves.get(keypoint.getOctave()).getDifferenceOfGaussians().get(keypoint.getScale());
 			
 			windowOffset = 6*keypoint.getSigma()*1.5/2.0;
 			int rowMin = (int)Math.ceil(keypoint.getY()-windowOffset),
@@ -27,6 +27,7 @@ public class KeypointsGenerator {
 			hist = new double[36];
 			Arrays.fill(hist, 0.0);
 			int r=0,c,rC=0,cC=0;
+			System.out.println("Keypoint ("+keypoint.getX()+","+keypoint.getY()+")");
 			for(int row = rowMin; row < rowMax; row++) {
 				c = 0;
 				for(int col = colMin; col < colMax; col++) {
@@ -46,7 +47,8 @@ public class KeypointsGenerator {
 								Math.atan2( (image.getPixel(row-1, col)-image.getPixel(row+1, col)) , image.getPixel(row, col+1)-image.getPixel(row, col-1) )
 							:
 								0.0;
-					theta[r][c] = theta[r][c] < 0 ? (2*Math.PI-theta[r][c]) : theta[r][c]; 
+					theta[r][c] = theta[r][c] < 0 ? (2*Math.PI-theta[r][c]) : theta[r][c];
+					//System.out.println((k++)+" mag["+r+","+c+"]="+mag[r][c]+" theta["+r+","+c+"]="+theta[r][c]);
 					hist[ radianToBin(theta[r][c]) ] +=
 							(row < image.getHeight() && row > 0 && col < image.getWidth() && col > 0) 
 							? 
