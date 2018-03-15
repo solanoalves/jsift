@@ -137,7 +137,7 @@ public class ExtremaDetector implements KeypointDetector {
 					
 					//removing low contrast points
 					double constrast = dog.get(inti).getPixel(ri, ci)+(result[PARTIAL_DERIVATIVES][0]*result[OFFSET][1] + result[PARTIAL_DERIVATIVES][1]*result[OFFSET][0] + result[PARTIAL_DERIVATIVES][2]*result[OFFSET][2])*0.5;
-					if(constrast < 0.03) {
+					if(constrast < 0.07) {
 						continue colLoop;
 					}
 					

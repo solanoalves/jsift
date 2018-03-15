@@ -23,20 +23,19 @@ public class DescriptorGenerator {
 					continue;
 				}
 				offset = (4*(r/4))*8 + (c/4)*8;
-				desc[offset + radianToBin(theta[row][col], keypointDirection)] += mag[row][col] * KeypointsGenerator.gaussianCircularWeight(r, c, 4.0);
-				if(desc[offset + radianToBin(theta[row][col], keypointDirection)] > 0.2)
-					desc[offset + radianToBin(theta[row][col], keypointDirection)] = 0.2;					
+				desc[offset + radianToBin(theta[row][col])] += mag[row][col] * KeypointsGenerator.gaussianCircularWeight(r, c, 4.0);
+				if(desc[offset + radianToBin(theta[row][col])] > 0.2)
+					desc[offset + radianToBin(theta[row][col])] = 0.2;					
 			}
 		}
 		normalize(desc);		
 		return desc;
 	}
 	
-	private static int radianToBin(double radian, int keypointDirection) {
-		int dif = (int) (((Math.toDegrees(radian) + 360) % 360) - keypointDirection*10);
-		if(dif < 0)
-			dif = 360 + dif;
-		return dif/45;
+	private static int radianToBin(double radian) {
+		int bin = (int)(8.0*(radian+Math.PI)/(2*Math.PI));
+		bin = bin < 8 ? bin : 0;
+		return bin;
 	}
 	
 	private static void normalize(double[] toNormalize) {
