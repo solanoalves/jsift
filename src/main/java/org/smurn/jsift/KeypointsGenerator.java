@@ -31,7 +31,7 @@ public class KeypointsGenerator {
 			theta = new double[rowMax-rowMin][colMax-colMin];
 			hist = new double[36];
 			Arrays.fill(hist, 0.0);
-			int r=0,c,rC=0,cC=0;
+			int r=0,c,rC=0,cC=0, bin=0;
 			DecimalFormat df = new DecimalFormat("0.00");
 			if(keypoint.getX() != 344.5 && keypoint.getY() != 344.5) continue;
 			for(int row = rowMin; row < rowMax; row++) {
@@ -53,14 +53,17 @@ public class KeypointsGenerator {
 								Math.atan( (image.getPixel(row-1, col)-image.getPixel(row+1, col))/(image.getPixel(row, col+1)-image.getPixel(row, col-1)) )
 							:
 								0.0;
-					hist[ radianToBin(theta[r][c]) ] +=
+					bin = radianToBin(theta[r][c]);
+					hist[ bin ] +=
 							(row < image.getHeight() && row > 0 && col < image.getWidth() && col > 0) 
 							? 
 								mag[r][c] * gaussianCircularWeight(r, c, 1.5*keypoint.getSigma())
 							:
 								0.0;
+					System.out.print(df.format(Math.toDegrees((theta[r][c] < 0 ? 2*Math.PI+theta[r][c] : theta[r][c])%(Math.PI*2)))+"\t");
 					c++;
 				}
+				System.out.println("");
 				r++;
 			}
 			
@@ -76,7 +79,9 @@ public class KeypointsGenerator {
 	}
 	
 	private static int radianToBin(double radian) {
-		int bin = (int) (radian < 0.0 ? ((2.0*Math.PI+radian)/(Math.PI/18.0)) : (radian / (Math.PI/18.0)));
+		double tmp = radian;
+		radian = ((radian < 0.0 ? (2.0*Math.PI+radian) : radian) % (2*Math.PI));
+		int bin = (int) (radian / (Math.PI/18.0)); 
 		bin = bin < 36 ? bin : 0;
 		return bin;
 	}
