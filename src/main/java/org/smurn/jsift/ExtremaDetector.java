@@ -114,7 +114,11 @@ public class ExtremaDetector implements KeypointDetector {
 					int ri = row;
 					int ci = col;
 					while(i < SIFT_MAX_INTERP_STEPS) {
-						result = interpolate(ri, ci, inti, dog);
+						try {
+							result = interpolate(ri, ci, inti, dog);
+						}catch(Exception e) {
+							break colLoop;
+						}
 						if(Math.abs(result[OFFSET][0]) < 0.5 && Math.abs(result[OFFSET][1]) < 0.5 && Math.abs(result[OFFSET][2]) < 0.5)
 							break;
 						
@@ -137,7 +141,7 @@ public class ExtremaDetector implements KeypointDetector {
 					
 					//removing low contrast points
 					double constrast = dog.get(inti).getPixel(ri, ci)+(result[PARTIAL_DERIVATIVES][0]*result[OFFSET][1] + result[PARTIAL_DERIVATIVES][1]*result[OFFSET][0] + result[PARTIAL_DERIVATIVES][2]*result[OFFSET][2])*0.5;
-					if(constrast < 0.07) {
+					if(constrast < 0.05) {
 						continue colLoop;
 					}
 					

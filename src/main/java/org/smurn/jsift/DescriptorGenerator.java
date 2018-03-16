@@ -33,7 +33,9 @@ public class DescriptorGenerator {
 	}
 	
 	private static int radianToBin(double radian) {
-		int bin = (int)(8.0*(radian+Math.PI)/(2*Math.PI));
+		radian = radian % (2*Math.PI);
+		radian = ((radian < 0.0 ? (2.0*Math.PI+radian) : radian));
+		int bin = (int) (radian / (Math.PI/4.0)); 
 		bin = bin < 8 ? bin : 0;
 		return bin;
 	}

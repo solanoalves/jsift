@@ -1,7 +1,6 @@
 package org.smurn.jsift;
 
 import java.awt.geom.Point2D;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +20,6 @@ public class KeypointsGenerator {
 		for(ScaleSpacePoint keypoint : scaleSpacePoints) {
 			Image image = octaves.get(keypoint.getOctave()).getScaleImages().get(keypoint.getScale());
 			point = image.fromOriginal(new Point2D.Double(keypoint.getX(), keypoint.getY()));
-			
 			windowOffset = 6*keypoint.getSigma()*1.5/2.0;
 			int rowMin = (int)Math.ceil(point.getY()-windowOffset),
 				rowMax = (int)Math.ceil(point.getY()+windowOffset),
@@ -32,8 +30,7 @@ public class KeypointsGenerator {
 			hist = new double[36];
 			Arrays.fill(hist, 0.0);
 			int r=0,c,rC=0,cC=0, bin=0;
-			DecimalFormat df = new DecimalFormat("0.00");
-			if(keypoint.getX() != 344.5 && keypoint.getY() != 344.5) continue;
+			System.out.println(keypoint.getX()+" "+keypoint.getY());
 			for(int row = rowMin; row < rowMax; row++) {
 				c = 0;
 				for(int col = colMin; col < colMax; col++) {
@@ -44,29 +41,26 @@ public class KeypointsGenerator {
 					mag[r][c] = 
 								(row+1 < image.getHeight() && row-1 > -1 && col+1 < image.getWidth() && col-1 > -1) 
 							? 
-								Math.sqrt( Math.pow(image.getPixel(row, col+1)-image.getPixel(row, col-1), 2) + Math.pow(image.getPixel(row-1, col)-image.getPixel(row+1, col), 2) )
+								Math.sqrt( Math.pow(image.getPixel(row, col+1)-image.getPixel(row, col-1), 2) + Math.pow(image.getPixel(row+1, col)-image.getPixel(row-1, col), 2) )
 							:
 								0.0;
 					theta[r][c] =
 							(row+1 < image.getHeight() && row-1 > -1 && col+1 < image.getWidth() && col-1 > -1) 
 							? 
-								Math.atan( (image.getPixel(row-1, col)-image.getPixel(row+1, col))/(image.getPixel(row, col+1)-image.getPixel(row, col-1)) )
+								Math.atan( (image.getPixel(row+1, col)-image.getPixel(row-1, col))/(image.getPixel(row, col+1)-image.getPixel(row, col-1)) )
 							:
 								0.0;
-					bin = radianToBin(theta[r][c]);
+					bin = radianToBin((theta[r][c] < 0 ? 2*Math.PI+theta[r][c] : theta[r][c])%(Math.PI*2));
 					hist[ bin ] +=
 							(row < image.getHeight() && row > 0 && col < image.getWidth() && col > 0) 
 							? 
-								mag[r][c] * gaussianCircularWeight(r, c, 1.5*keypoint.getSigma())
+								mag[r][c] * gaussianCircularWeight(r, c, 6*keypoint.getSigma())
 							:
-								0.0;
-					System.out.print(df.format(Math.toDegrees((theta[r][c] < 0 ? 2*Math.PI+theta[r][c] : theta[r][c])%(Math.PI*2)))+"\t");
+								0.0;					
 					c++;
 				}
-				System.out.println("");
 				r++;
 			}
-			
 			List<Keypoint> kps = generateKeyPointDescriptor(hist, keypoint, mag, theta, cC, rC);
 			keypoints.addAll(kps);
 		}
@@ -79,15 +73,14 @@ public class KeypointsGenerator {
 	}
 	
 	private static int radianToBin(double radian) {
-		double tmp = radian;
-		radian = ((radian < 0.0 ? (2.0*Math.PI+radian) : radian) % (2*Math.PI));
+		radian = radian % (2*Math.PI);
+		radian = ((radian < 0.0 ? (2.0*Math.PI+radian) : radian));
 		int bin = (int) (radian / (Math.PI/18.0)); 
 		bin = bin < 36 ? bin : 0;
 		return bin;
 	}
 	
 	private static List<Keypoint> generateKeyPointDescriptor(double[] histogram, ScaleSpacePoint point, double[][] mag, double[][] theta, int cC, int rC){
-//		DecimalFormat df = new DecimalFormat("0.00");
 		List<Keypoint> keypoints = new ArrayList<Keypoint>();
 		double max = 0, max80 = 0;
 		int orientation=0, orientation80=0;
@@ -105,33 +98,37 @@ public class KeypointsGenerator {
 			}
 		}
 		
-		System.out.println("Max encontrado: "+max+" e "+orientation);
-		
 		//rotate relative to dominant
-//		double[][] t = new double[mag.length][];
-//		double[][] t80 = new double[mag.length][];
-//		for(int i = 0; i < theta.length; i++) {
-//		    t[i] = theta[i].clone();
-//		    t80[i] = theta[i].clone();
-//		    for(int j=0; j<t[0].length; j++) {
-//		    	t[i][j] = t[i][j] - (Math.PI/18)*orientation;
-//		    }
+		double[][] t = new double[mag.length][];
+		double[][] t80 = new double[mag.length][];
+		for(int i = 0; i < theta.length; i++) {
+		    t[i] = theta[i].clone();
+		    t80[i] = theta[i].clone();
+		    for(int j=0; j<t[0].length; j++) {
+		    	t[i][j] = theta[i][j] - (Math.PI/18)*orientation;
+		    }
 //		    if(max80 > 0) {
 //			    for(int j=0; j<t80[0].length; j++) {
 //			    	t80[i][j] = t80[i][j] - (Math.PI/18)*orientation80;
 //			    }
 //		    }
+		}
+//		for(int i = 0; i < t.length; i++) {
+//		    for(int j=0; j<t[0].length; j++) {
+//		    	System.out.print(df.format(Math.toDegrees((t[i][j] < 0 ? 2*Math.PI+t[i][j] : t[i][j])%(Math.PI*2)))+"\t");
+//		    }
+//		    System.out.println("");
 //		}
+//		System.out.println("Dominante: "+orientation*10+" centro:"+Math.toDegrees(theta[cC][rC])+" corrigido: "+Math.toDegrees(t[cC][rC]));
+		
 		if(orientation > 0 && max > 0) {
-//			System.out.println("thetaAjustado["+rC+"]["+cC+"]="+df.format(t[rC][cC]));
-//			double[] desc = DescriptorGenerator.generate(orientation, mag, t, cC, rC);
-			keypoints.add(new Keypoint(point, max, orientation, null));
+			double[] desc = DescriptorGenerator.generate(orientation, mag, t, cC, rC);
+			keypoints.add(new Keypoint(point, max, orientation, desc));
 		}
-		if(orientation80 > 0 && max80 > 0) {
-//			System.out.println("thetaAjustado80["+rC+"]["+cC+"]="+df.format(t80[rC][cC]));
+//		if(orientation80 > 0 && max80 > 0) {
 //			double[] desc80 = DescriptorGenerator.generate(orientation80, mag, t80, cC, rC);
-			keypoints.add(new Keypoint(point, max80, orientation80, null));
-		}
+//			keypoints.add(new Keypoint(point, max80, orientation80, desc80));
+//		}
 		
 		return keypoints;
 	}
