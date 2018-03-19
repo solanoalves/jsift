@@ -1,12 +1,23 @@
 package org.smurn.jsift;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 public class KeypointsGenerator {
+	private static final double SIGMA_FACTOR = 1.5;
+	private static final double ORIENTATION_RADIUS = 3.0 * SIGMA_FACTOR;	
+	
 	public static List<Keypoint> calculate(Collection<ScaleSpacePoint> scaleSpacePoints, List<Octave> octaves) throws Exception {
 		if(scaleSpacePoints == null || scaleSpacePoints.isEmpty())
 			throw new Exception("keypoints cannot be null or empty");
@@ -16,21 +27,29 @@ public class KeypointsGenerator {
 		double[][] mag, theta;
 		double[] hist;
 		Point2D point;
-
+		int b = (int) (new Date().getTime() & 0xFF);
+		double scaleFactor;
+//		DecimalFormat df = new DecimalFormat("0.00");
 		for(ScaleSpacePoint keypoint : scaleSpacePoints) {
 			Image image = octaves.get(keypoint.getOctave()).getScaleImages().get(keypoint.getScale());
+			scaleFactor = ScaleSpaceFactoryImpl.LOWE_INITIAL_SIGMA * Math.pow(2, keypoint.getScale() / octaves.get(keypoint.getOctave()).getDifferenceOfGaussians().size());
 			point = image.fromOriginal(new Point2D.Double(keypoint.getX(), keypoint.getY()));
-			windowOffset = 6*keypoint.getSigma()*1.5/2.0;
-			int rowMin = (int)Math.ceil(point.getY()-windowOffset),
-				rowMax = (int)Math.ceil(point.getY()+windowOffset),
-				colMin = (int)Math.ceil(point.getX()-windowOffset),
-				colMax = (int)Math.ceil(point.getX()+windowOffset);
+			windowOffset = ORIENTATION_RADIUS * scaleFactor;
+			int rowMin = (int)Math.round(point.getY()-windowOffset),
+				rowMax = (int)Math.round(point.getY()+windowOffset),
+				colMin = (int)Math.round(point.getX()-windowOffset),
+				colMax = (int)Math.round(point.getX()+windowOffset);
 			mag = new double[rowMax-rowMin][colMax-colMin];
 			theta = new double[rowMax-rowMin][colMax-colMin];
 			hist = new double[36];
 			Arrays.fill(hist, 0.0);
 			int r=0,c,rC=0,cC=0, bin=0;
-			System.out.println(keypoint.getX()+" "+keypoint.getY());
+//			//remover
+//			BufferedImage bi = image.toBufferedImage();
+//			Graphics g1 = bi.getGraphics();
+//			g1.setColor(new Color(255, 255, 255));
+//			//remover
+			
 			for(int row = rowMin; row < rowMax; row++) {
 				c = 0;
 				for(int col = colMin; col < colMax; col++) {
@@ -54,15 +73,23 @@ public class KeypointsGenerator {
 					hist[ bin ] +=
 							(row < image.getHeight() && row > 0 && col < image.getWidth() && col > 0) 
 							? 
-								mag[r][c] * gaussianCircularWeight(r, c, 6*keypoint.getSigma())
+								mag[r][c] * gaussianCircularWeight(r, c, ORIENTATION_RADIUS * scaleFactor)
 							:
-								0.0;					
+								0.0;
 					c++;
 				}
 				r++;
 			}
+//			g1.drawOval((int)point.getX()-10, (int)point.getY()-10, 20, 20);
+//			g1.drawLine((int)point.getX(), (int)point.getY(), (int)(point.getX() + Math.cos(theta[rC][cC])*10), (int)(point.getY() + Math.sin(theta[rC][cC])*10));
 			List<Keypoint> kps = generateKeyPointDescriptor(hist, keypoint, mag, theta, cC, rC);
 			keypoints.addAll(kps);
+			//remover
+//			g1.setColor(new Color(0,0,0));
+//			g1.drawLine((int)point.getX(), (int)point.getY(), (int)point.getX(), (int)point.getY());
+//			File outputfile = new File("image"+(b++)+".png");
+//			ImageIO.write(bi, "png", outputfile);
+			//remover
 		}
 //		}
 		return keypoints;
@@ -91,19 +118,19 @@ public class KeypointsGenerator {
 			}
 		}
 
-		for(int i = 0; i < histogram.length; i++) {
-			if(histogram[i] != max && histogram[i] >= max*0.8 && histogram[i] > max80) {
-				max80 = histogram[i];
-				orientation80 = i;
-			}
-		}
+//		for(int i = 0; i < histogram.length; i++) {
+//			if(histogram[i] != max && histogram[i] >= max*0.8 && histogram[i] > max80) {
+//				max80 = histogram[i];
+//				orientation80 = i;
+//			}
+//		}
 		
 		//rotate relative to dominant
 		double[][] t = new double[mag.length][];
-		double[][] t80 = new double[mag.length][];
+//		double[][] t80 = new double[mag.length][];
 		for(int i = 0; i < theta.length; i++) {
 		    t[i] = theta[i].clone();
-		    t80[i] = theta[i].clone();
+//		    t80[i] = theta[i].clone();
 		    for(int j=0; j<t[0].length; j++) {
 		    	t[i][j] = theta[i][j] - (Math.PI/18)*orientation;
 		    }

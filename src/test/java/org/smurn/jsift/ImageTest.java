@@ -20,6 +20,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
 
@@ -80,10 +81,12 @@ public class ImageTest {
 			g.drawImage(imgTarget.toBufferedImage(), imgBase.getWidth(), 0, null);
 			g.setColor(new Color(255, 255, 255));
 			double dist = 0;
+			DecimalFormat df = new DecimalFormat("0.00");
 			for(Keypoint kb : keypointsBase) {
 				for(Keypoint kt : keypointsTarget) {
 					dist = EuclideanDistance.calculate(kb.getDescriptor(), kt.getDescriptor());
-					if(dist < 0.3) {
+					if(dist < 0.5) {
+						g.drawString(df.format(dist), (int)kb.getPoint().getX()-5, (int)kb.getPoint().getY()-5);
 						g.drawOval((int)kb.getPoint().getX()-5, (int)kb.getPoint().getY()-5, 10, 10);
 						g.drawOval(imgBase.getWidth()+(int)kt.getPoint().getX()-5, (int)kt.getPoint().getY()-5, 10, 10);
 						g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), ((int)kt.getPoint().getX())+imgBase.toBufferedImage().getWidth(), (int)kt.getPoint().getY());
@@ -100,7 +103,7 @@ public class ImageTest {
 //			g1.setColor(new Color(255, 255, 255));
 //			int r = 0;
 //			for(Keypoint kb : keypointsBase) {
-//				r = (int)(5*kb.getMagnitude());
+//				r = (int)(20*kb.getMagnitude());
 //				g1.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
 //				g1.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
 //			}
@@ -111,7 +114,7 @@ public class ImageTest {
 //			Graphics g2 = bi2.getGraphics();
 //			g2.setColor(new Color(255, 255, 255));
 //			for(Keypoint kb : keypointsTarget) {
-//				r = (int)(5*kb.getMagnitude());
+//				r = (int)(20*kb.getMagnitude());
 //				g2.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
 //				g2.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
 //			}

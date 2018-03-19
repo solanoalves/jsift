@@ -21,6 +21,7 @@ import org.apache.commons.math.linear.LUDecomposition;
 import org.apache.commons.math.linear.LUDecompositionImpl;
 import org.apache.commons.math.linear.NonSquareMatrixException;
 import org.apache.commons.math.linear.RealMatrix;
+import org.apache.commons.math.linear.SingularValueDecompositionImpl;
 
 /**
  * Solves a system of three linear equations in three unknowns using the LU
@@ -56,8 +57,8 @@ public class LUSolver3 implements LinearSolver3 {
         double [][] rhs = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
 
         // Solving AB = I for given A
-        RealMatrix A = new Array2DRowRealMatrix(m);
-        DecompositionSolver solver = new LUDecompositionImpl(A).getSolver();
+        RealMatrix A = new Array2DRowRealMatrix(m);        
+        DecompositionSolver solver = new SingularValueDecompositionImpl(A).getSolver();
 
         RealMatrix I = new Array2DRowRealMatrix(rhs);
         RealMatrix B = solver.solve(I);

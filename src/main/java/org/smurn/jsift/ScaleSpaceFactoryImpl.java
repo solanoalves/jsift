@@ -26,7 +26,7 @@ public class ScaleSpaceFactoryImpl implements ScaleSpaceFactory {
     /** Number of scales per octave as proposed by Lowe. */
     private static final int LOWE_SCALES_PER_OCTAVE = 2;
     /** Blur of the first scale-level as proposed by Lowe. */
-    private static final double LOWE_INITIAL_SIGMA = 0.8;
+    public static final double LOWE_INITIAL_SIGMA = 0.8;
 
     /**
      * Creates a scale space for an image using the parameters and algorithms

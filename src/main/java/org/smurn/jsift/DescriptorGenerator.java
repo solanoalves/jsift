@@ -23,7 +23,7 @@ public class DescriptorGenerator {
 					continue;
 				}
 				offset = (4*(r/4))*8 + (c/4)*8;
-				desc[offset + radianToBin(theta[row][col])] += mag[row][col] * KeypointsGenerator.gaussianCircularWeight(r, c, 4.0);
+				desc[offset + radianToBin(theta[row][col])] += mag[row][col]; // * KeypointsGenerator.gaussianCircularWeight(r, c, 2.0);
 				if(desc[offset + radianToBin(theta[row][col])] > 0.2)
 					desc[offset + radianToBin(theta[row][col])] = 0.2;					
 			}

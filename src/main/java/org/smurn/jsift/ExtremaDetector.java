@@ -87,7 +87,7 @@ public class ExtremaDetector implements KeypointDetector {
 				
 				int k, l, m;
 				if(value > 0) {
-					maximum: 
+					maximum:
 					for( k = -1; k <= 1; k++ )
 						for( l = -1; l <= 1; l++ )
 						  for( m = -1; m <= 1; m++ )
@@ -96,7 +96,7 @@ public class ExtremaDetector implements KeypointDetector {
 						    	break maximum;
 						    }
 				}else {
-					minimum: 
+					minimum:
 					for( k = -1; k <= 1; k++ )
 						for( l = -1; l <= 1; l++ )
 						  for( m = -1; m <= 1; m++ )
@@ -122,11 +122,11 @@ public class ExtremaDetector implements KeypointDetector {
 						if(Math.abs(result[OFFSET][0]) < 0.5 && Math.abs(result[OFFSET][1]) < 0.5 && Math.abs(result[OFFSET][2]) < 0.5)
 							break;
 						
-						ri = (int)Math.ceil(ri+result[OFFSET][0]);
-						ci = (int)Math.ceil(ci+result[OFFSET][1]);
-						inti = (int)Math.ceil(inti+result[OFFSET][2]);						
+						ci = (int)Math.round(ci+result[OFFSET][0]);
+						ri = (int)Math.round(ri+result[OFFSET][1]);
+						inti = (int)Math.round(inti+result[OFFSET][2]);						
 						
-						if(inti < 1 || inti >= SIFT_INTERVALS || ri < SIFT_IMG_BORDER || ci < SIFT_IMG_BORDER 
+						if(inti < 1 || inti > SIFT_INTERVALS || ri < SIFT_IMG_BORDER || ci < SIFT_IMG_BORDER 
 								|| ri > dog.get(0).getHeight() - SIFT_IMG_BORDER || ci > dog.get(0).getWidth() - SIFT_IMG_BORDER)
 							continue colLoop;
 						
@@ -140,15 +140,15 @@ public class ExtremaDetector implements KeypointDetector {
 						continue colLoop;
 					
 					//removing low contrast points
-					double constrast = dog.get(inti).getPixel(ri, ci)+(result[PARTIAL_DERIVATIVES][0]*result[OFFSET][1] + result[PARTIAL_DERIVATIVES][1]*result[OFFSET][0] + result[PARTIAL_DERIVATIVES][2]*result[OFFSET][2])*0.5;
-					if(constrast < 0.05) {
+					double contrast = dog.get(inti).getPixel(ri, ci)+(result[PARTIAL_DERIVATIVES][0]*result[OFFSET][0] + result[PARTIAL_DERIVATIVES][1]*result[OFFSET][1] + result[PARTIAL_DERIVATIVES][2]*result[OFFSET][2])*0.5;
+					if(Math.abs(contrast) < 0.07) {
 						continue colLoop;
 					}
 					
 					//remove edge responses
-					if(result[EDGE_RESPONSE][0] <= 10.0) {
+					if(result[EDGE_RESPONSE][0] <= 10.0 && result[EDGE_RESPONSE][1] > 0) {
 						Point2D coords = center.toOriginal(new Point2D.Double(ci, ri));
-						ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), center.getSigma(), octave, dogCount);
+						ScaleSpacePoint point = new ScaleSpacePoint(coords.getX(), coords.getY(), center.getSigma(), octave, inti);
 						points.add(point);						
 					}
 				}
@@ -190,8 +190,9 @@ public class ExtremaDetector implements KeypointDetector {
 		
 		//edge response < 10
 		double edgeResponse = (Math.pow(hessian[0][0]+hessian[1][1], 2) / (hessian[0][0]*hessian[1][1]-Math.pow(hessian[0][1]*hessian[1][0],2)));
+		double det = (hessian[0][0]*hessian[1][1]-Math.pow(hessian[0][1]*hessian[1][0],2));
 		
-		return new double[][] {{offsetX, offsetY, offsetS}, {partialX, partialY, partialS}, {edgeResponse, 0.0, 0.0}};
+		return new double[][] {{offsetX, offsetY, offsetS}, {partialX, partialY, partialS}, {edgeResponse, det, 0.0}};
 	}
 
 	// Difference Of Gaussian
@@ -224,23 +225,23 @@ public class ExtremaDetector implements KeypointDetector {
 
 	// second derivative of Fx to y
 	private double Fxy(int row, int col, Image image) {
-		double fl = dog(row-1, col+1, image) + dog(row-1, col-1, image);
-		double fr = dog(row+1, col+1, image) - dog(row+1, col-1, image);
-		return (fr + fl) / 4.0;
+		double fr = dog(row+1, col+1, image) - dog(row-1, col+1, image);
+		double fl = dog(row+1, col-1, image) + dog(row-1, col-1, image);
+		return (fr - fl) / 4.0;
 	}
 
 	// second derivative of Fx to s
 	private double Fxs(int row, int col, Image high, Image low) {
-		double fl = dog(row, col+1, low) + dog(row, col-1, low);
-		double fr = dog(row, col+1, high) - dog(row, col-1, high);
-		return (fr + fl) / 4.0;
+		double fr = dog(row, col+1, high) - dog(row, col+1, low);
+		double fl = dog(row, col-1, high) + dog(row, col-1, low);
+		return (fr - fl) / 4.0;
 	}
 	
 	// second derivative of Fy to s
 	private double Fys(int row, int col, Image high, Image low) {
-		double fl = dog(row+1, col, low) + dog(row-1, col, low);
-		double fr = dog(row+1, col, high) - dog(row-1, col, high);
-		return (fr + fl) / 4.0;
+		double fr = dog(row+1, col, high) - dog(row+1, col, low);
+		double fl = dog(row-1, col, high) + dog(row-1, col, low);
+		return (fr - fl) / 4.0;
 	}
 	
 	// second derivative of Fy to x
