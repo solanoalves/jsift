@@ -45,12 +45,12 @@ public class ImageTest {
 			Collection<ScaleSpacePoint> pointsBase = extremaDetector.detectKeypoints(ssBase);
 			List<Keypoint> keypointsBase = KeypointsGenerator.calculate(pointsBase, ssBase.getOctaves());
 			System.out.println("-----");
-			BufferedImage target = ImageIO.read(new File("lena20.jpg"));
+			BufferedImage target = ImageIO.read(new File("lena90.jpg"));
 			Image imgTarget = new Image(target);
 			ScaleSpace ssTarget = spaceFac.create(imgTarget);
 			Collection<ScaleSpacePoint> pointsTarget = extremaDetector.detectKeypoints(ssTarget);
 			List<Keypoint> keypointsTarget = KeypointsGenerator.calculate(pointsTarget, ssTarget.getOctaves());
-
+//
 			BufferedImage result = new BufferedImage(imgBase.getWidth()+imgTarget.getWidth(), imgBase.getHeight()+imgTarget.getHeight(), imgBase.toBufferedImage().getType());
 			
 //			//Pontos
@@ -85,7 +85,10 @@ public class ImageTest {
 			for(Keypoint kb : keypointsBase) {
 				for(Keypoint kt : keypointsTarget) {
 					dist = EuclideanDistance.calculate(kb.getDescriptor(), kt.getDescriptor());
-					if(dist < 0.5) {
+//					System.out.print ("("+kb.getPoint().getX()+","+kb.getPoint().getY()+") "+"("+kt.getPoint().getX()+","+kt.getPoint().getY()+")");
+//					System.out.println(" Distancia "+dist);
+					if(dist < 1) {
+						System.out.println(" Distancia "+dist);
 						g.drawString(df.format(dist), (int)kb.getPoint().getX()-5, (int)kb.getPoint().getY()-5);
 						g.drawOval((int)kb.getPoint().getX()-5, (int)kb.getPoint().getY()-5, 10, 10);
 						g.drawOval(imgBase.getWidth()+(int)kt.getPoint().getX()-5, (int)kt.getPoint().getY()-5, 10, 10);
@@ -98,28 +101,28 @@ public class ImageTest {
 			ImageIO.write(result, "png", o);
 			
 //			System.out.println("--------");
-//			BufferedImage bi = imgBase.toBufferedImage();
-//			Graphics g1 = bi.getGraphics();
-//			g1.setColor(new Color(255, 255, 255));
-//			int r = 0;
-//			for(Keypoint kb : keypointsBase) {
-//				r = (int)(20*kb.getMagnitude());
-//				g1.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
-//				g1.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
-//			}
-//			File outputfile = new File("saved1.png");
-//			ImageIO.write(bi, "png", outputfile);
-//			System.out.println("--------");
-//			BufferedImage bi2 = imgTarget.toBufferedImage();
-//			Graphics g2 = bi2.getGraphics();
-//			g2.setColor(new Color(255, 255, 255));
-//			for(Keypoint kb : keypointsTarget) {
-//				r = (int)(20*kb.getMagnitude());
-//				g2.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
-//				g2.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
-//			}
-//			File outputfile2 = new File("saved2.png");
-//			ImageIO.write(bi2, "png", outputfile2);
+			BufferedImage bi = imgBase.toBufferedImage();
+			Graphics g1 = bi.getGraphics();
+			g1.setColor(new Color(255, 255, 255));
+			int r = 0;
+			for(Keypoint kb : keypointsBase) {
+				r = (int)(20*kb.getMagnitude());
+				g1.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
+				g1.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
+			}
+			File outputfile = new File("saved1.png");
+			ImageIO.write(bi, "png", outputfile);
+			System.out.println("--------");
+			BufferedImage bi2 = imgTarget.toBufferedImage();
+			Graphics g2 = bi2.getGraphics();
+			g2.setColor(new Color(255, 255, 255));
+			for(Keypoint kb : keypointsTarget) {
+				r = (int)(20*kb.getMagnitude());
+				g2.drawOval((int)kb.getPoint().getX()-r/2, (int)kb.getPoint().getY()-r/2, r, r);
+				g2.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), (int)(kb.getPoint().getX() + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
+			}
+			File outputfile2 = new File("saved2.png");
+			ImageIO.write(bi2, "png", outputfile2);
 
 		} catch (Exception e) {
 			e.printStackTrace();
