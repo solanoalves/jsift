@@ -81,19 +81,18 @@ public class ImageTest {
 			g.drawImage(imgTarget.toBufferedImage(), imgBase.getWidth(), 0, null);
 			g.setColor(new Color(255, 255, 255));
 			double dist = 0;
-			DecimalFormat df = new DecimalFormat("0.00");
+			DecimalFormat df = new DecimalFormat("0.0000");
 			for(Keypoint kb : keypointsBase) {
 				for(Keypoint kt : keypointsTarget) {
 					dist = EuclideanDistance.calculate(kb.getDescriptor(), kt.getDescriptor());
-//					System.out.print ("("+kb.getPoint().getX()+","+kb.getPoint().getY()+") "+"("+kt.getPoint().getX()+","+kt.getPoint().getY()+")");
-//					System.out.println(" Distancia "+dist);
-					if(dist < 1) {
-						System.out.println(" Distancia "+dist);
+					if(dist < 0.8) {
+						System.out.print ("("+kb.getPoint().getX()+","+kb.getPoint().getY()+") "+"("+kt.getPoint().getX()+","+kt.getPoint().getY()+")");
+						System.out.println(" Distancia "+dist);						
+						
 						g.drawString(df.format(dist), (int)kb.getPoint().getX()-5, (int)kb.getPoint().getY()-5);
 						g.drawOval((int)kb.getPoint().getX()-5, (int)kb.getPoint().getY()-5, 10, 10);
 						g.drawOval(imgBase.getWidth()+(int)kt.getPoint().getX()-5, (int)kt.getPoint().getY()-5, 10, 10);
 						g.drawLine((int)kb.getPoint().getX(), (int)kb.getPoint().getY(), ((int)kt.getPoint().getX())+imgBase.toBufferedImage().getWidth(), (int)kt.getPoint().getY());
-						break;
 					}
 				}
 			}

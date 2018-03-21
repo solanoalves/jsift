@@ -1,10 +1,17 @@
 package org.smurn.jsift;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 /**
  * Based on github.com/robwhess
@@ -13,7 +20,9 @@ import java.util.List;
  */
 public class KeypointsGenerator {
 	private static final double SIGMA_FACTOR = 1.5;
-	private static final double ORIENTATION_RADIUS = 3.0 * SIGMA_FACTOR;	
+	private static final double ORIENTATION_RADIUS = 3.0 * SIGMA_FACTOR;
+	
+	static int kp = 0;
 	
 	public static List<Keypoint> calculate(Collection<ScaleSpacePoint> scaleSpacePoints, List<Octave> octaves) throws Exception {
 		if(scaleSpacePoints == null || scaleSpacePoints.isEmpty())
@@ -24,12 +33,14 @@ public class KeypointsGenerator {
 		double[][] mag, theta;
 		double[] hist;
 		Point2D point;
-		double scaleFactor;
+		double scaleFactor, sigmaFactor;
+		DecimalFormat df = new DecimalFormat("0.00");
 		for(ScaleSpacePoint keypoint : scaleSpacePoints) {
 			Image image = octaves.get(keypoint.getOctave()).getScaleImages().get(keypoint.getScale());
 			scaleFactor = ScaleSpaceFactoryImpl.LOWE_INITIAL_SIGMA * Math.pow(2, keypoint.getScale() / octaves.get(keypoint.getOctave()).getDifferenceOfGaussians().size());
+			sigmaFactor = ORIENTATION_RADIUS * scaleFactor * ((double)(octaves.size()-keypoint.getOctave()) / octaves.size());
 			point = image.fromOriginal(new Point2D.Double(keypoint.getX(), keypoint.getY()));
-			windowOffset = ORIENTATION_RADIUS * scaleFactor * 1.1;
+			windowOffset = sigmaFactor * 2;
 			int rowMin = (int)Math.round(point.getY()-windowOffset),
 				rowMax = (int)Math.round(point.getY()+windowOffset),
 				colMin = (int)Math.round(point.getX()-windowOffset),
@@ -40,7 +51,12 @@ public class KeypointsGenerator {
 			Arrays.fill(hist, 0.0);
 			int r=0,c=0;
 			
-//			if(keypoint.getX() != 402 && keypoint.getY() != 402) continue;
+//			if(keypoint.getX() != 172.5 && keypoint.getX() != 101.0) continue;
+			
+			BufferedImage bi = image.toBufferedImage();
+			Graphics g1 = bi.getGraphics();
+			g1.setColor(new Color(255,255,255));
+			g1.drawOval((int)point.getX()-15, (int)point.getY()-15, 30, 30);
 			
 //			System.out.println(keypoint.getX()+","+keypoint.getY());
 			
@@ -59,23 +75,33 @@ public class KeypointsGenerator {
 								Math.atan( (image.getPixel(row-1, col)-image.getPixel(row+1, col))/(image.getPixel(row, col+1)-image.getPixel(row, col-1)) )
 							:
 								0.0;
+					double fac = gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigmaFactor);
 					hist[ radianToBin(theta[r][c]) ] +=
 							(row < image.getHeight() && row > 0 && col < image.getWidth() && col > 0) 
 							? 
-								mag[r][c] * gaussianCircularWeight(r-mag.length/2, c-mag[0].length/2, ORIENTATION_RADIUS * scaleFactor)
+								mag[r][c] * gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigmaFactor)
 							:
 								0.0;
+					g1.setColor(new Color((int)(255*fac), (int)(255*fac), (int)(255*fac)));
+					g1.drawLine(col, row, col, row);
+//				if(row == (int)keypoint.getY() && col == (int)keypoint.getX())
+//					System.out.print(df.format(Math.toDegrees(theta[r][c]))+"*\t");
+//				else
+//					System.out.print(df.format(Math.toDegrees(theta[r][c]))+"\t");
 					c++;
 				}
+//				System.out.println("");				
 				r++;
 			}
-			List<Keypoint> kps = generateKeyPointDescriptor(hist, keypoint, image, ORIENTATION_RADIUS * scaleFactor);
+			File outputfile = new File("keypoints"+(kp++)+".png");
+			ImageIO.write(bi, "png", outputfile);
+			List<Keypoint> kps = generateKeyPointDescriptor(hist, keypoint, (int)point.getX(), (int)point.getY(), image, sigmaFactor);
 			keypoints.addAll(kps);
 		}
 		return keypoints;
 	}
 	
-	public static double gaussianCircularWeight(int i, int j, double sigma) {
+	public static double gaussianCircularWeight(double i, double j, double sigma) {
 	    return Math.exp(-0.5 * (i * i + j * j) / sigma / sigma);
 	}
 	
@@ -87,7 +113,7 @@ public class KeypointsGenerator {
 		return bin;
 	}
 	
-	private static List<Keypoint> generateKeyPointDescriptor(double[] histogram, ScaleSpacePoint point, Image image, double sigma){
+	private static List<Keypoint> generateKeyPointDescriptor(double[] histogram, ScaleSpacePoint point, int centerX, int centerY, Image image, double sigma){
 		List<Keypoint> keypoints = new ArrayList<Keypoint>();
 		double max = 0, max80 = 0;
 		int orientation=0, orientation80=0;
@@ -109,7 +135,7 @@ public class KeypointsGenerator {
 //		}
 		
 		if(orientation > 0 && max > 0) {
-			double[] desc = DescriptorGenerator.generate(orientation, image, (int)point.getX(), (int)point.getY(), sigma);
+			double[] desc = DescriptorGenerator.generate(orientation, image, centerX, centerY, sigma);
 			keypoints.add(new Keypoint(point, max, orientation, desc));
 		}
 //		if(orientation80 > 0 && max80 > 0) {
