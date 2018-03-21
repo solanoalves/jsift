@@ -85,7 +85,7 @@ public class ImageTest {
 			for(Keypoint kb : keypointsBase) {
 				for(Keypoint kt : keypointsTarget) {
 					dist = EuclideanDistance.calculate(kb.getDescriptor(), kt.getDescriptor());
-					if(dist < 0.8) {
+					if(dist < 0.01) {
 						System.out.print ("("+kb.getPoint().getX()+","+kb.getPoint().getY()+") "+"("+kt.getPoint().getX()+","+kt.getPoint().getY()+")");
 						System.out.println(" Distancia "+dist);						
 						

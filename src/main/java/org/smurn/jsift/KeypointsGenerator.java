@@ -51,7 +51,7 @@ public class KeypointsGenerator {
 			Arrays.fill(hist, 0.0);
 			int r=0,c=0;
 			
-//			if(keypoint.getX() != 172.5 && keypoint.getX() != 101.0) continue;
+			if(keypoint.getX() != 402 && keypoint.getY() != 402) continue;
 			
 			BufferedImage bi = image.toBufferedImage();
 			Graphics g1 = bi.getGraphics();
@@ -93,8 +93,8 @@ public class KeypointsGenerator {
 //				System.out.println("");				
 				r++;
 			}
-			File outputfile = new File("keypoints"+(kp++)+".png");
-			ImageIO.write(bi, "png", outputfile);
+//			File outputfile = new File("keypoints"+(kp++)+".png");
+//			ImageIO.write(bi, "png", outputfile);
 			List<Keypoint> kps = generateKeyPointDescriptor(hist, keypoint, (int)point.getX(), (int)point.getY(), image, sigmaFactor);
 			keypoints.addAll(kps);
 		}
@@ -126,6 +126,10 @@ public class KeypointsGenerator {
 				orientation = i;
 			}
 		}
+		if(orientation > 0 && max > 0) {
+			double[] desc = DescriptorGenerator.generate(orientation, image, centerX, centerY, sigma);
+			keypoints.add(new Keypoint(point, max, orientation, desc));
+		}
 
 //		for(int i = 0; i < histogram.length; i++) {
 //			if(histogram[i] != max && histogram[i] >= max*0.8 && histogram[i] > max80) {
@@ -134,10 +138,6 @@ public class KeypointsGenerator {
 //			}
 //		}
 		
-		if(orientation > 0 && max > 0) {
-			double[] desc = DescriptorGenerator.generate(orientation, image, centerX, centerY, sigma);
-			keypoints.add(new Keypoint(point, max, orientation, desc));
-		}
 //		if(orientation80 > 0 && max80 > 0) {
 //			double[] desc80 = DescriptorGenerator.generate(orientation80, image, (int)point.getX(), (int)point.getY(), sigma);
 //			keypoints.add(new Keypoint(point, max80, orientation80, desc80));
