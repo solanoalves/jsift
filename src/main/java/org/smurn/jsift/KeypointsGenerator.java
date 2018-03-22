@@ -1,17 +1,11 @@
 package org.smurn.jsift;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 /**
  * Based on github.com/robwhess
@@ -51,12 +45,12 @@ public class KeypointsGenerator {
 			Arrays.fill(hist, 0.0);
 			int r=0,c=0;
 			
-			if(keypoint.getX() != 402 && keypoint.getY() != 402) continue;
+//			if(keypoint.getX() != 402 && keypoint.getY() != 402) continue;
 			
-			BufferedImage bi = image.toBufferedImage();
-			Graphics g1 = bi.getGraphics();
-			g1.setColor(new Color(255,255,255));
-			g1.drawOval((int)point.getX()-15, (int)point.getY()-15, 30, 30);
+//			BufferedImage bi = image.toBufferedImage();
+//			Graphics g1 = bi.getGraphics();
+//			g1.setColor(new Color(255,255,255));
+//			g1.drawOval((int)point.getX()-15, (int)point.getY()-15, 30, 30);
 			
 //			System.out.println(keypoint.getX()+","+keypoint.getY());
 			
@@ -66,13 +60,13 @@ public class KeypointsGenerator {
 					mag[r][c] = 
 								(row+1 < image.getHeight() && row-1 > -1 && col+1 < image.getWidth() && col-1 > -1) 
 							? 
-								Math.sqrt( Math.pow(image.getPixel(row, col+1)-image.getPixel(row, col-1), 2) + Math.pow(image.getPixel(row+1, col)-image.getPixel(row-1, col), 2) )
+								Math.sqrt( Math.pow(image.getPixel(row, col+1)-image.getPixel(row, col-1), 2) + Math.pow(image.getPixel(row-1, col)-image.getPixel(row+1, col), 2) )
 							:
 								0.0;
 					theta[r][c] =
 							(row+1 < image.getHeight() && row-1 > -1 && col+1 < image.getWidth() && col-1 > -1) 
 							? 
-								Math.atan( (image.getPixel(row-1, col)-image.getPixel(row+1, col))/(image.getPixel(row, col+1)-image.getPixel(row, col-1)) )
+								Math.atan2( (image.getPixel(row-1, col)-image.getPixel(row+1, col)), (image.getPixel(row, col+1)-image.getPixel(row, col-1)) )
 							:
 								0.0;
 					double fac = gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigmaFactor);
@@ -82,12 +76,9 @@ public class KeypointsGenerator {
 								mag[r][c] * gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigmaFactor)
 							:
 								0.0;
-					g1.setColor(new Color((int)(255*fac), (int)(255*fac), (int)(255*fac)));
-					g1.drawLine(col, row, col, row);
-//				if(row == (int)keypoint.getY() && col == (int)keypoint.getX())
-//					System.out.print(df.format(Math.toDegrees(theta[r][c]))+"*\t");
-//				else
-//					System.out.print(df.format(Math.toDegrees(theta[r][c]))+"\t");
+//					g1.setColor(new Color((int)(255*fac), (int)(255*fac), (int)(255*fac)));
+//					g1.drawLine(col, row, col, row);
+
 					c++;
 				}
 //				System.out.println("");				
@@ -106,9 +97,7 @@ public class KeypointsGenerator {
 	}
 	
 	private static int radianToBin(double radian) {
-		radian = radian % (2*Math.PI);
-		radian = ((radian < 0.0 ? (2.0*Math.PI+radian) : radian));
-		int bin = (int) (radian / (Math.PI/18.0));		
+		int bin = (int) (Math.round(36 * (radian + Math.PI)/(2*Math.PI)));		
 		bin = bin < 36 ? bin : 0;
 		return bin;
 	}

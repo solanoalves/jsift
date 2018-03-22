@@ -1,14 +1,6 @@
 package org.smurn.jsift;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.Arrays;
-
-import javax.imageio.ImageIO;
 
 public class DescriptorGenerator {
 	public static int cont = 0;
@@ -19,27 +11,28 @@ public class DescriptorGenerator {
 		theta = new double[16][16];
 		double[] desc = new double[128];
 		Arrays.fill(desc, 0.0);
-		int offset = 0, ci,ri, c=0, r=-1, cRot=0, rRot=0, cRotN=0, cRotP=0, rRotN=0, rRotP=0;
+		int offset = 0, ci,ri, c=0, r=-1, cRot=0, rRot=0;
 		double rad = orientation * Math.PI/18;
 		double cos = Math.cos(-rad);
 		double sen = Math.sin(-rad);
 		
-		DecimalFormat df = new DecimalFormat("0.00");
+//		DecimalFormat df = new DecimalFormat("0.00");
 		
-		BufferedImage bi = image.toBufferedImage();
-		Graphics g1 = bi.getGraphics();
-		g1.setColor(new Color(255,255,255));
-		g1.drawOval(centerX-15, centerY-15, 30, 30);
+//		BufferedImage bi = image.toBufferedImage();
+//		Graphics g1 = bi.getGraphics();
+//		g1.setColor(new Color(255,255,255));
+//		g1.drawOval(centerX-15, centerY-15, 30, 30);
 //		System.out.println("");
-		System.out.println(orientation*10+"°");
+//		System.out.println(orientation*10+"°");
 //		System.out.println("");
 		
+//		System.out.println("("+centerX+","+centerY+")");
 		for(int row = centerY - 8; row < centerY+8; row++) {
 			r++;
 			c=-1;
 			for(int col = centerX-8; col < centerX+8; col++) {
 				c++;
-				if( !(c > 0 && c < 16 && r > 0 && r < 16) ) {
+				if( !(c >= 0 && c < 16 && r >= 0 && r < 16) ) {
 					continue;
 				}
 				
@@ -47,42 +40,37 @@ public class DescriptorGenerator {
 				
 //				System.out.println("("+row+","+col+") -> ("+rRot+","+cRot+")");
 				
-				mag[r][c] = Math.sqrt( 
-								Math.pow(getRotatedPixel(image, centerX, centerY, row, col+1, cos, sen)-getRotatedPixel(image, centerX, centerY, row, col-1, cos, sen), 2) 
-							  + Math.pow(getRotatedPixel(image, centerX, centerY, row+1, col, cos, sen)-getRotatedPixel(image, centerX, centerY, row-1, col, cos, sen), 2) 
-							);
-				theta[r][c] = Math.atan( 
-								(getRotatedPixel(image, centerX, centerY, row-1, col, cos, sen)-getRotatedPixel(image, centerX, centerY, row+1, col, cos, sen))
-								/
-								(getRotatedPixel(image, centerX, centerY, row, col+1, cos, sen)-getRotatedPixel(image, centerX, centerY, row, col-1, cos, sen))
-							  );
-						
-//				theta[r][c] = theta[r][c] - rad;
-//
-//				while(theta[r][c] < 0)
-//					theta[r][c] += 2*Math.PI;
-//				while(theta[r][c] >= 2*Math.PI)
-//					theta[r][c] -= 2*Math.PI;
+				ri = row-centerY;
+				ci = col-centerX;
+				rRot = centerY + (int)(ri*cos + ci*sen);
+				cRot = centerX + (int)(ci*cos - ri*sen);
 				
-				double fac = KeypointsGenerator.gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigma);
+				if(rRot+1 > image.getHeight() || rRot-1 < 0 || cRot+1 > image.getWidth() || cRot-1 < 0) continue;
+				
+				mag[r][c] = Math.floor(Math.sqrt( 
+								Math.pow(image.getPixel(rRot, cRot+1)-image.getPixel(rRot, cRot-1), 2) 
+							  + Math.pow(image.getPixel(rRot-1, cRot)-image.getPixel(rRot+1, cRot), 2) 
+							) * 100) / 100;
+				theta[r][c] = Math.atan2(
+								(getRotatedPixel(image, centerX, centerY, col, row-1, cos, sen) - getRotatedPixel(image, centerX, centerY, col, row+1, cos, sen))
+								,
+								(getRotatedPixel(image, centerX, centerY, col+1, row, cos, sen) - getRotatedPixel(image, centerX, centerY, col-1, row, cos, sen))
+							  );
+
+//				double fac = KeypointsGenerator.gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigma);
 
 				offset = (4*(r/4))*8 + (c/4)*8;
 				desc[ offset + radianToBin(theta[r][c]) ] += mag[r][c] * KeypointsGenerator.gaussianCircularWeight(r-mag.length/2+0.5, c-mag[0].length/2+0.5, sigma);
 				
-				if(row == centerY+7 && col==centerX+7) {
-					ri = row-centerY;
-					ci = col-centerX;
-					rRot = centerY + (int)(ri*cos + ci*sen);
-					cRot = centerX + (int)(ci*cos - ri*sen);
-					g1.setColor(new Color(0,0,0));
-					g1.drawLine(centerX, centerY, cRot, rRot);
-					g1.setColor(new Color(120,120,120));
-					g1.drawLine(centerX, centerY, col, row);
-					System.out.println("\n("+row+","+col+") -> ("+rRot+","+cRot+")");
-				}else {
-					g1.setColor(new Color(255,255,255));
-					g1.drawRect(col, row, 1, 1);
-				}
+//				if((row == centerY+7 && col==centerX+7)) {
+//					g1.setColor(new Color(0,0,0));
+//					g1.drawLine(centerX, centerY, cRot, rRot);
+//					
+//					System.out.print("Valor rotacionado: "+mag[r][c]+"\t");
+//				}else {
+//					g1.setColor(new Color(255,255,255));
+//					g1.drawRect(col, row, 1, 1);
+//				}
 				
 				
 //				g1.drawLine(col, row, (int)(col + (r/2)*Math.cos(kb.getDirection()*(Math.PI/18.0))), (int)(kb.getPoint().getY() + (r/2)*Math.sin(kb.getDirection()*(Math.PI/18.0))));
@@ -92,22 +80,24 @@ public class DescriptorGenerator {
 //				else
 //					System.out.print(df.format(Math.toDegrees(theta[r][c]))+"\t");
 				
-				System.out.print(df.format(mag[r][c])+"\t");
+//				System.out.print(df.format(mag[r][c])+"\t");
+//				System.out.print(radianToBin(theta[r][c])+"\t");
+//				System.out.print(df.format(getRotatedPixel(image, centerX, centerY, row, col, cos, sen))+"\t");
 //				System.out.print((offset + radianToBin(theta[r][c]))+"\t");
 				
 //				if(desc[offset + radianToBin(theta[r][c])] > 0.2)
 //					desc[offset + radianToBin(theta[r][c])] = 0.2;
 			}	
-			System.out.println("");
+//			System.out.println("");
 		}
 		
-		File outputfile = new File("descriptor"+(cont++)+".png");
-		try {
-			ImageIO.write(bi, "png", outputfile);
-		} catch (IOException e) {
-		}
+//		File outputfile = new File("descriptor"+(cont++)+".png");
+//		try {
+//			ImageIO.write(bi, "png", outputfile);
+//		} catch (IOException e) {
+//		}
 		
-//		normalize(desc);
+		normalize(desc);
 		
 //		for(int i=0; i<desc.length; i++) {
 //			System.out.println(i+"\t"+df.format(desc[i]));
