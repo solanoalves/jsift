@@ -45,7 +45,7 @@ public class DescriptorGenerator {
 				rRot = centerY + (int)(ri*cos + ci*sen);
 				cRot = centerX + (int)(ci*cos - ri*sen);
 				
-				if(rRot+1 > image.getHeight() || rRot-1 < 0 || cRot+1 > image.getWidth() || cRot-1 < 0) continue;
+				if((rRot+1 > image.getHeight()-1) || (rRot-1 < 0) || (cRot+1 > image.getWidth()-1) || (cRot-1 < 0)) continue;
 				
 				mag[r][c] = Math.floor(Math.sqrt( 
 								Math.pow(image.getPixel(rRot, cRot+1)-image.getPixel(rRot, cRot-1), 2) 
