@@ -30,8 +30,8 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-			BufferedImage base = ImageIO.read(new File("cnh.png"));
-			Image imgBase = TransformImage.binarizeSkeletonizeImage(new Image(base));
+			BufferedImage base = ImageIO.read(new File("/home/solano/1.png"));
+			Image imgBase = TransformImage.binarizeImage(new Image(base));
 	
 			int[][] regions = new int[imgBase.getHeight()][imgBase.getWidth()];
 			for (int i = 0; i < regions.length; i++) {
@@ -41,22 +41,28 @@ public class ImageTest {
 			}
 			
 			int regioes = TransformImage.countRegions(imgBase, regions);
-			int[] hBins = new int[8];
-			int[] vBins = new int[8];
+			int[][] hBins = new int[2][8];
+			int[][] vBins = new int[2][8];
 			TransformImage.segmentRegionCount(regions, hBins, vBins);
 			System.out.println("Regioes "+regioes);
 			for (int i = 0; i < vBins.length; i++) {
-				System.out.println(i+"\t"+vBins[i]);
+				for (int j = 0; j < vBins[0].length; j++) {
+					System.out.print(vBins[i][j]+"\t");
+				}
+				System.out.println("");
 			}
 			for (int i = 0; i < hBins.length; i++) {
-				System.out.println(i+"\t"+hBins[i]);
-			}			
+				for (int j = 0; j < hBins[0].length; j++) {
+					System.out.print(hBins[i][j]+"\t");
+				}
+				System.out.println("");
+			}
 			//xxxxxxxxxxxxxxxxxxxxxx
 			System.out.println("-------------------------");
 			//xxxxxxxxxxxxxxxxxxxxxx
 			
-			BufferedImage query = ImageIO.read(new File("fran.png"));
-			Image imgQuery = TransformImage.binarizeSkeletonizeImage(new Image(query));
+			BufferedImage query = ImageIO.read(new File("/home/solano/2.png"));
+			Image imgQuery = TransformImage.binarizeImage(new Image(query));
 	
 			regions = new int[imgQuery.getHeight()][imgQuery.getWidth()];
 			for (int i = 0; i < regions.length; i++) {
@@ -68,10 +74,16 @@ public class ImageTest {
 			TransformImage.segmentRegionCount(regions, hBins, vBins);
 			System.out.println("Regioes "+regioes);
 			for (int i = 0; i < vBins.length; i++) {
-				System.out.println(i+"\t"+vBins[i]);
+				for (int j = 0; j < vBins[0].length; j++) {
+					System.out.print(vBins[i][j]+"\t");
+				}
+				System.out.println("");
 			}
 			for (int i = 0; i < hBins.length; i++) {
-				System.out.println(i+"\t"+hBins[i]);
+				for (int j = 0; j < hBins[0].length; j++) {
+					System.out.print(hBins[i][j]+"\t");
+				}
+				System.out.println("");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

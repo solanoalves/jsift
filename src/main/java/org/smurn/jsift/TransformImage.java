@@ -6,7 +6,7 @@ import java.util.Queue;
 
 public class TransformImage {
 	
-	public static Image binarizeSkeletonizeImage(Image image) {		
+	public static Image binarizeImage(Image image) {		
 		Image ret = null;
 		if(image != null) {
 			ret = new Image(image.getHeight(), image.getWidth());
@@ -22,13 +22,6 @@ public class TransformImage {
 		}
 		ret = TransformImage.cutMinMaxPixels(ret);
 		ret = dilate(ret);
-//		Image tmp = skeletonization(ret, true);
-//		while(tmp != null) {
-//			ret = tmp;
-//			tmp = skeletonization(tmp, false);
-//			if(tmp != null)
-//				ret = tmp;
-//		}
 		return ret;
 	}
 	
@@ -164,12 +157,12 @@ public class TransformImage {
 		return rc;
 	}
 	
-	public static void segmentRegionCount(int[][] markers, int hBins[], int vBins[]) {
+	public static void segmentRegionCount(int[][] markers, int hBins[][], int vBins[][]) {
 		if(markers != null) {
 			for (int row = 0; row < markers.length; row++) {
                 for (int col = 0; col < markers[0].length; col++) {
-                	vBins[row / (markers.length/8+1)] += (markers[row][col] > 0 ? 1 : 0);
-                	hBins[col / (markers[0].length/8+1)] += (markers[row][col] > 0 ? 1 : 0);
+                	vBins[col / (markers[0].length/2+1)][row / (markers.length/vBins[0].length+1)] += (markers[row][col] > 0 ? 1 : 0);
+                	hBins[row / (markers.length/2+1)][col / (markers[0].length/hBins[0].length+1)] += (markers[row][col] > 0 ? 1 : 0);
                 }
             }
 		}
