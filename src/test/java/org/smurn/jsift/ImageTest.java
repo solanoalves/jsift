@@ -15,8 +15,12 @@
  */
 package org.smurn.jsift;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.text.DecimalFormat;
 
 import javax.imageio.ImageIO;
 
@@ -30,8 +34,9 @@ public class ImageTest {
 	@Test
 	public void comparar() {
 		try {
-			BufferedImage base = ImageIO.read(new File("/home/solano/1.png"));
-			Image imgBase = TransformImage.binarizeImage(new Image(base));
+			BufferedImage base = ImageIO.read(new File("assinatura.jpg"));
+			Image imgBase = new Image(base);
+			DecimalFormat df = new DecimalFormat("0.000");
 	
 			int[][] regions = new int[imgBase.getHeight()][imgBase.getWidth()];
 			for (int i = 0; i < regions.length; i++) {
@@ -41,19 +46,21 @@ public class ImageTest {
 			}
 			
 			int regioes = TransformImage.countRegions(imgBase, regions);
-			int[][] hBins = new int[2][8];
-			int[][] vBins = new int[2][8];
+			double[][] hBins = new double[2][6];
+			double[][] vBins = new double[2][6];
 			TransformImage.segmentRegionCount(regions, hBins, vBins);
 			System.out.println("Regioes "+regioes);
+			System.out.println("Vertical");
 			for (int i = 0; i < vBins.length; i++) {
 				for (int j = 0; j < vBins[0].length; j++) {
-					System.out.print(vBins[i][j]+"\t");
+					System.out.print(df.format(vBins[i][j])+"\t");
 				}
 				System.out.println("");
 			}
+			System.out.println("Horizontal");
 			for (int i = 0; i < hBins.length; i++) {
 				for (int j = 0; j < hBins[0].length; j++) {
-					System.out.print(hBins[i][j]+"\t");
+					System.out.print(df.format(hBins[i][j])+"\t");
 				}
 				System.out.println("");
 			}
@@ -61,8 +68,8 @@ public class ImageTest {
 			System.out.println("-------------------------");
 			//xxxxxxxxxxxxxxxxxxxxxx
 			
-			BufferedImage query = ImageIO.read(new File("/home/solano/2.png"));
-			Image imgQuery = TransformImage.binarizeImage(new Image(query));
+			BufferedImage query = ImageIO.read(new File("cnh.png"));
+			Image imgQuery = new Image(query);
 	
 			regions = new int[imgQuery.getHeight()][imgQuery.getWidth()];
 			for (int i = 0; i < regions.length; i++) {
@@ -73,18 +80,32 @@ public class ImageTest {
 			regioes = TransformImage.countRegions(imgQuery, regions);
 			TransformImage.segmentRegionCount(regions, hBins, vBins);
 			System.out.println("Regioes "+regioes);
+			System.out.println("Vertical");
 			for (int i = 0; i < vBins.length; i++) {
 				for (int j = 0; j < vBins[0].length; j++) {
-					System.out.print(vBins[i][j]+"\t");
+					System.out.print(df.format(vBins[i][j])+"\t");
 				}
 				System.out.println("");
 			}
+			System.out.println("Horizontal");
 			for (int i = 0; i < hBins.length; i++) {
 				for (int j = 0; j < hBins[0].length; j++) {
-					System.out.print(hBins[i][j]+"\t");
+					System.out.print(df.format(hBins[i][j])+"\t");
 				}
 				System.out.println("");
 			}
+			
+			
+			BufferedImage result = new BufferedImage(Math.max(imgBase.getWidth(),imgQuery.getWidth()), imgBase.getHeight()+imgQuery.getHeight(), imgBase.toBufferedImage().getType());
+			Graphics g = result.getGraphics();
+			Graphics2D drawer = result.createGraphics() ;
+			drawer.setBackground(Color.WHITE);
+			drawer.clearRect(0,0,result.getWidth(),result.getHeight());
+			g.drawImage(imgBase.toBufferedImage(), 0, 0, null);
+			g.drawImage(imgQuery.toBufferedImage(), 0, imgBase.getHeight(), null);
+			File o = new File("saved.png");
+			ImageIO.write(result, "png", o);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
